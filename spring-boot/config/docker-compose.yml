@@ -1,0 +1,12 @@
+version: '3'
+services:
+  web:
+    image: 925016407349.dkr.ecr.eu-west-1.amazonaws.com/portfolio-sb
+    ports:
+      - "8080:8080"
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: stockport-sb
+        awslogs-region: eu-west-1
+        awslogs-stream-prefix: web

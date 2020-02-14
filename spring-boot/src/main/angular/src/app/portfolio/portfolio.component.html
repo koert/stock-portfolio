@@ -1,0 +1,91 @@
+<p-panel header="Portfolio">
+  <p-button label="Refresh prices" icon="pi pi-download" (onClick)="refreshPortfolioPrices()"></p-button>
+  <p-table [value]="portfolioRows" dataKey="rowIndex" [tableStyle]="{'table-layout': 'auto', 'width': 'auto'}">
+    <ng-template pTemplate="header">
+      <tr>
+        <th colspan="2">Stock</th>
+        <th colspan="2">Bought</th>
+        <th colspan="2">Latest</th>
+        <th colspan="2">Profit</th>
+        <th></th>
+      </tr>
+      <tr>
+        <th pSortableColumn="symbol">
+          Symbol
+          <p-sortIcon field="symbol" ariaLabel="Activate to sort" ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+        </th>
+<!--        <th pSortableColumn="name">-->
+<!--          Name-->
+<!--          <p-sortIcon field="name" ariaLabel="Activate to sort" ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>-->
+<!--        </th>-->
+        <th pSortableColumn="amount">
+          Amount
+          <p-sortIcon field="amount" ariaLabel="Activate to sort" ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+        </th>
+        <th pSortableColumn="buyPrice">
+          Price
+          <p-sortIcon field="buyPrice" ariaLabel="Activate to sort" ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+        </th>
+        <th pSortableColumn="buyValue">
+          Value
+          <p-sortIcon field="buyValue" ariaLabel="Activate to sort" ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+        </th>
+        <th pSortableColumn="latestPrice">
+          Price
+          <p-sortIcon field="latestPrice" ariaLabel="Activate to sort" ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+        </th>
+        <th pSortableColumn="latestValue">
+          Value
+          <p-sortIcon field="latestValue" ariaLabel="Activate to sort" ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+        </th>
+        <th pSortableColumn="profit">
+          Profit
+          <p-sortIcon field="profit" ariaLabel="Activate to sort" ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+        </th>
+        <th pSortableColumn="annualizedProfit">
+          Annualized
+          <p-sortIcon field="annualizedProfit" ariaLabel="Activate to sort" ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+        </th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-row let-rowData>
+      <tr>
+        <td>{{row.symbol}}</td>
+<!--        <td><span>{{row.name}}</span></td>-->
+        <td class="amount">{{row.amount}}</td>
+        <td class="price">{{row.buyPrice | currency : row.currency}}</td>
+        <td class="price">{{row.buyValue | currency : row.currency}}</td>
+        <td class="price"><span>{{row.latestPrice | currency : row.currency}}</span></td>
+        <td class="price">{{row.latestValue | currency : row.currency}}</td>
+        <td class="price">{{row.profit | currency : row.currency}}</td>
+        <td class="price">{{row.annualizedProfit | percent : '1.1'}}</td>
+        <td><p-button icon="pi pi-pencil" (onClick)="showPositionDialog(row)"></p-button></td>
+      </tr>
+    </ng-template>
+  </p-table>
+  <p-button label="Add position" icon="pi pi-plus" (onClick)="addPosition()"></p-button>
+</p-panel>
+
+<p-dialog header="Portfolio position" [(visible)]="positionDialogVisible">
+  <table *ngIf="editPortfolioRow">
+    <tr>
+      <th>Symbol</th>
+      <td><input type="text" pInputText [(ngModel)]="editPortfolioRow.symbol"/></td>
+    </tr>
+    <tr>
+      <th>Amount</th>
+      <td><input type="text" pInputText [(ngModel)]="editPortfolioRow.amount"/></td>
+    </tr>
+    <tr>
+      <th>Purchase Date</th>
+      <td><p-calendar [(ngModel)]="editPortfolioRow.buyDate" appendTo="body"></p-calendar></td>
+    </tr>
+    <tr>
+      <th>Purchase Price</th>
+      <td><input type="text" pInputText [(ngModel)]="editPortfolioRow.buyPrice"/></td>
+    </tr>
+  </table>
+  <p-button label="Cancel" icon="pi pi-times" (onClick)="positionEditCancel()"></p-button>
+  <p-button label="Ok" icon="pi pi-check" (onClick)="positionEditOk()"></p-button>
+</p-dialog>
