@@ -1,4 +1,5 @@
 
+
 ----
 $ mvn clean package
 $ docker build -f src/main/docker/Dockerfile -t springio/portfolio .
@@ -16,17 +17,43 @@ $ docker run -i --rm -p 8080:8080 springio/portfolio
 2020-02-14 07:21:04.423  INFO 1 --- [           main] zencode.sb.portfolio.Application         : Started Application in 1.902 seconds (JVM running for 2.408)
 ----
 
-== AWS deployment
+== Spring Boot on AWS
+I created a very small application to retrieve stock prices with Quarkus - to compare with Spring Boot, I ported the application to Spring Boot.
+Porting is trivial, the annotations are slightly different, but the concepts and structures are the same.
 
+The big difference is the application startup time. Because the Quarkus application is compiled to native OS code, it starts up within milliseconds.
+The Spring Boot application runs on a Java Virtual Machine (JVM) and takes much more time to startup: 2.2 seconds. Memory usage seems about the same: about 60 MB.
+The performance of the Quarkus version is somewhat better, but this is difficult to compare, since it depends on another service to retrieve
+the stock price.
+
+The nice part of Spring Boot is that you can run your application easily in you IDE - this may be possible with Quarkus too, I have not seen it yet.
+
+== AWS deployment
+The way to deploy it on AWS ECS, is to package it in a Docker (Alpine based) container and run it that way.
+
+See more info about using the AWS ECS command line interface:
 https://docs.aws.amazon.com/AmazonECS/latest/userguide/ecs-cli-tutorial-fargate.html
 
-Create repository on console
-https://console.aws.amazon.com/ecr/repositories?region=us-east-1
+I created a Docker repository on AWS ECR:
+https://console.aws.amazon.com/ecr/repositories?region=eu-west-1
 
 ----
+$ aws configure
+$ aws ecr create-repository --repository-name portfolio-sb
+{
+    "repository": {
+        "repositoryArn": "arn:aws:ecr:eu-west-1:925016407349:repository/portfolio-sb",
+        "registryId": "925016407349",
+        "repositoryName": "portfolio-sb",
+        "repositoryUri": "925016407349.dkr.ecr.eu-west-1.amazonaws.com/portfolio-sb",
+        "createdAt": 1582038128.0,
+        "imageTagMutability": "MUTABLE"
+    }
+}
+
 $ $(aws ecr get-login --no-include-email)
 $ docker images springio/portfolio
-$ docker tag 99ae4bcce4d4 925016407349.dkr.ecr.eu-west-1.amazonaws.com/portfolio-sb
+$ docker tag 145fdaddf163 925016407349.dkr.ecr.eu-west-1.amazonaws.com/portfolio-sb
 $ docker push 925016407349.dkr.ecr.eu-west-1.amazonaws.com/portfolio-sb
 ----
 
@@ -56,13 +83,11 @@ INFO[0000] Saved ECS CLI profile configuration portfolio-sb-profile.
 ----
 $ ecs-cli up --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
 INFO[0000] Created cluster                               cluster=portfolio-sb region=eu-west-1
-INFO[0000] Waiting for your CloudFormation stack resources to be deleted...
-INFO[0000] Cloudformation stack status                   stackStatus=DELETE_IN_PROGRESS
-INFO[0061] Waiting for your cluster resources to be created...
-INFO[0062] Cloudformation stack status                   stackStatus=CREATE_IN_PROGRESS
-VPC created: vpc-07511eb97bb24c65d
-Subnet created: subnet-0449347227d14d272
-Subnet created: subnet-0057ae8968a04a500
+INFO[0001] Waiting for your cluster resources to be created...
+INFO[0001] Cloudformation stack status                   stackStatus=CREATE_IN_PROGRESS
+VPC created: vpc-066fc23c0ccbea573
+Subnet created: subnet-037a40bf6d77c7e5b
+Subnet created: subnet-025672b8b74f237a1
 Cluster creation succeeded.
 ----
 
@@ -70,33 +95,33 @@ Cluster creation succeeded.
 ----
 $ aws ec2 describe-security-groups --filters Name=vpc-id,Values=<VPC-ID> --region $AWS_DEFAULT_REGION
             "OwnerId": "925016407349",
-            "GroupId": "sg-0c941edb775c0e802",
+            "GroupId": "sg-002b0fab54fee2767",
 ----
 
 .Authorize ports
 ----
 $ aws ec2 authorize-security-group-ingress --group-id sg-01231231231231233 --protocol tcp --port 80 --cidr 0.0.0.0/0 --region $AWS_DEFAULT_REGION
-$ aws ec2 authorize-security-group-ingress --group-id sg-0c941edb775c0e802 --protocol tcp --port 8080 --cidr 0.0.0.0/0 --region $AWS_DEFAULT_REGION
+$ aws ec2 authorize-security-group-ingress --group-id sg-002b0fab54fee2767 --protocol tcp --port 8080 --cidr 0.0.0.0/0 --region $AWS_DEFAULT_REGION
 ----
 
 .Bring the cluster up
 ----
 $ ecs-cli compose --project-name portfolio-sb service up --create-log-groups --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
 INFO[0000] Using ECS task definition                     TaskDefinition="portfolio-sb:1"
-INFO[0000] Created Log Group stockport-sb in eu-west-1
-INFO[0001] Created an ECS service                        service=portfolio-sb taskDefinition="portfolio-sb:1"
+WARN[0000] Failed to create log group stockport-sb in eu-west-1: The specified log group already exists
+INFO[0000] Created an ECS service                        service=portfolio-sb taskDefinition="portfolio-sb:1"
 INFO[0001] Updated ECS service successfully              desiredCount=1 force-deployment=false service=portfolio-sb
-INFO[0016] (service portfolio-sb) has started 1 tasks: (task 410b9015-2994-4e82-b4f4-01b18a3bb32b).  timestamp="2020-02-14 12:03:58 +0000 UTC"
-INFO[0047] Service status                                desiredCount=1 runningCount=1 serviceName=portfolio-sb
-INFO[0047] (service portfolio-sb) has reached a steady state.  timestamp="2020-02-14 12:04:30 +0000 UTC"
-INFO[0047] ECS Service has reached a stable state        desiredCount=1 runningCount=1 serviceName=portfolio-sb
+INFO[0016] (service portfolio-sb) has started 1 tasks: (task f871c1cc-2f30-40f8-b000-3e8403f16685).  timestamp="2020-02-18 15:09:34 +0000 UTC"
+INFO[0046] Service status                                desiredCount=1 runningCount=1 serviceName=portfolio-sb
+INFO[0046] (service portfolio-sb) has reached a steady state.  timestamp="2020-02-18 15:10:07 +0000 UTC"
+INFO[0046] ECS Service has reached a stable state        desiredCount=1 runningCount=1 serviceName=portfolio-sb
 ----
 
 .Find out IP address
 ----
 $ ecs-cli compose --project-name portfolio-sb service ps --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
 Name                                      State    Ports                          TaskDefinition  Health
-f722cd93-7843-4dcd-8de6-44b56bff0a4d/web  RUNNING  54.229.109.153:8080->8080/tcp  portfolio-sb:1  UNKNOWN
+f871c1cc-2f30-40f8-b000-3e8403f16685/web  RUNNING  34.243.214.49:8080->8080/tcp  portfolio-sb:1  UNKNOWN
 ----
 
 Now the application is running and you can access it at the listen IP address and port.

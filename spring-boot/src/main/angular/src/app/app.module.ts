@@ -20,11 +20,13 @@ import {MessageService, SelectButtonModule, SidebarModule} from "primeng/primeng
 import {TableModule} from "primeng/table";
 import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
+import { LoginComponent } from './login/login.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    PortfolioComponent
+    PortfolioComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule, BrowserAnimationsModule, FormsModule, HttpClientModule,

@@ -11,6 +11,7 @@ import yahoofinance.YahooFinance;
 import java.io.IOException;
 
 /**
+ * REST endpoint for stocks.
  * @author Koert Zeilstra
  */
 @RestController
