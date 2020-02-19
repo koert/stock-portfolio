@@ -1,14 +1,12 @@
 package zencode.sb.portfolio.stock;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import yahoofinance.Stock;
-import yahoofinance.YahooFinance;
-
-import java.io.IOException;
 
 /**
  * REST endpoint for stocks.
@@ -18,6 +16,8 @@ import java.io.IOException;
 @RequestMapping("/stocks")
 public class StockEndpoint {
 
+  @Autowired private YahooFinanceRepository yahooFinanceRepository;
+
   /**
    * Lever abonnement.
    * @return Service response with status.
@@ -25,14 +25,13 @@ public class StockEndpoint {
   @RequestMapping(value="/{symbol}/latestPrice", method = RequestMethod.GET)
   public ResponseEntity<StockLatestPriceResponse> latestPrice(@PathVariable("symbol") String symbol) {
     ResponseEntity<StockLatestPriceResponse> responseEntity = null;
-    try {
-      Stock stock = YahooFinance.get(symbol);
+    Stock stock = yahooFinanceRepository.getStock(symbol);
+    if (stock == null) {
+      responseEntity = ResponseEntity.notFound().build();
+    } else {
       StockLatestPriceResponse response = new StockLatestPriceResponse(stock.getSymbol(), stock.getQuote().getPrice());
       responseEntity = ResponseEntity.ok().body(response);
-    } catch (IOException e) {
-      responseEntity = ResponseEntity.notFound().build();
     }
-
     return responseEntity;
   }
 }
