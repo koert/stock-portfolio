@@ -8,12 +8,12 @@ $ docker build -f src/main/docker/Dockerfile -t springio/portfolio .
 ----
 $ docker images
 REPOSITORY                                                       TAG                 IMAGE ID            CREATED             SIZE
-springio/portfolio                                               latest              948dbb691e7a        35 seconds ago      122MB
+springio/portfolio                                               latest              948dbb691e7a        35 seconds ago      165MB
 quarkus/portfolio                                                latest              c4a585fce784        6 days ago          148MB
 ----
 
 ----
-$ docker run -i --rm -p 8080:8080 springio/portfolio
+$ docker run -i --rm -p 8081:8080 springio/portfolio
 2020-02-14 07:21:04.423  INFO 1 --- [           main] zencode.sb.portfolio.Application         : Started Application in 1.902 seconds (JVM running for 2.408)
 ----
 
