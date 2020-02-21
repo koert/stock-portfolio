@@ -1,0 +1,14 @@
+{
+  "cluster": "portfolio-b-cluster",
+  "serviceName": "portfolio-sb-ecs",
+  "taskDefinition": "portfolio-sb",
+  "loadBalancers": [
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:eu-west-1:925016407349:targetgroup/portfolioSbTargetGroup/d75167d5e64e9362",
+      "containerName": "web",
+      "containerPort": 80
+    }
+  ],
+  "desiredCount": 2,
+  "role": "ecsServiceRole"
+}
