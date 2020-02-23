@@ -1,0 +1,93 @@
+= Angular simple unit tests
+
+The Angular command line interface (ng-cli) generates the code for a component for you, including html, stylesheet, component code and
+a unit test. It will generate a unit test, I added the necessary import en mocked service:
+
+[source,typescript]
+----
+describe('PortfolioComponent', () => {
+  let component: PortfolioComponent;
+  let fixture: ComponentFixture<PortfolioComponent>;
+  let stockService = mock(StockService);
+
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      imports: [BrowserModule, BrowserAnimationsModule, FormsModule,
+        ButtonModule, CalendarModule, DialogModule, DropdownModule, PanelModule, TableModule],
+      declarations: [ PortfolioComponent ],
+      providers: [
+        {provide: StockService, useValue: instance(stockService)}
+      ],
+    })
+    .compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(PortfolioComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+----
+
+The unit test above will setup a TestBed with imports and providers to make it possible to render the component.
+This will make sure that the HTML template will work with your component code. This is all great, but it comes with a price. When I do this,
+it takes more time to figure out which modules and services it needs. It also takes a bit longer to setup the TestBed and execute
+the unit test. On my machine this simple test took 550 milliseconds. I used https://www.npmjs.com/package/ts-mockito[ts-mockito] to mock the service.
+
+Some time ago, I saw https://youtu.be/7JucMlrs3dQ[a Youtube video on the ng-conf channel] that suggested to create a unit test without the test bed. You only need to call the constructor
+with injectables and ngOnInit() to setup the test. This makes it easy to inject mocked services and make a pure unit test that only tests
+your component code.
+
+[source,typescript]
+----
+describe('PortfolioComponent (Unit test)', () => {
+  let component: PortfolioComponent;
+  let stockService = mock(StockService);
+
+  beforeEach(async(() => {
+    component = new PortfolioComponent(instance(stockService));
+  }));
+
+  it('ngOnInit', () => {
+    component.ngOnInit();
+
+    expect(component.portfolioRows.length).toBe(2);
+  });
+
+  it('refreshPortfolioPrices', () => {
+    let response0 = new StockLatestPriceResponse();
+    response0.latestPrice = 1.23;
+    when(stockService.getStockLatestPrice("AAPL")).thenReturn(of(response0));
+    let response1 = new StockLatestPriceResponse();
+    response1.latestPrice = 2.34;
+    when(stockService.getStockLatestPrice("GOOG")).thenReturn(of(response1));
+
+    component.ngOnInit();
+    component.refreshPortfolioPrices();
+
+    expect(component.portfolioRows.length).toBe(2);
+    expect(component.portfolioRows[0].latestPrice).toBe(1.23);
+    expect(component.portfolioRows[1].latestPrice).toBe(2.34);
+  });
+});
+----
+
+Instead of setting up the TestBed, you just instantiate the component with its constructor and mocked service.
+You can run the same tests and this time it takes only 11 milliseconds. Compared with the TestBed, this takes only 1/50th of the time.
+If you have a substantial amount of tests, this save quite a lot of time.
+
+The drawback is of course that you don't test the component template. You can separate tests that include these templates
+with the TestBed; I have created portfolio.component.spec.ts and portfolio.component.unit.spec.ts to separate component and unit test.
+
+See my Github repository: https://github.com/koert/stock-portfolio/tree/master/spring-boot/src/main/angular/src/app/portfolio
+
+Conclusion:
+A pure unit test without TestBed:
+- doesn't test component template
+- not dependent on module import, less brittle
+- is 50 times faster
