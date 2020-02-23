@@ -1,7 +1,7 @@
-= Angular simple unit tests
+= Simpler unit tests in Angular
 
 The Angular command line interface (ng-cli) generates the code for a component for you, including html, stylesheet, component code and
-a unit test. It will generate a unit test, I added the necessary import en mocked service:
+a unit test. It will generate a unit test, I added the necessary import and mocked service:
 
 [source,typescript]
 ----
