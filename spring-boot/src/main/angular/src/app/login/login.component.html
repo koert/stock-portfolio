@@ -1,3 +1,13 @@
-<p>
-  login works!
-</p>
+<p-panel header="Login">
+  <table>
+    <tr>
+      <th>User ID</th>
+      <td><input type="text" pInputText [(ngModel)]="userId"/></td>
+    </tr>
+    <tr>
+      <th>password</th>
+      <td><input type="password" pInputText [(ngModel)]="password"/></td>
+    </tr>
+  </table>
+  <p-button label="Login" icon="pi pi-download" (onClick)="login()"></p-button>
+</p-panel>

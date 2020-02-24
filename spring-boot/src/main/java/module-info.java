@@ -32,9 +32,13 @@ open module portfolio {
     requires spring.expression;
     requires spring.core;
     requires spring.jcl;
+    requires spring.security.core;
+    requires spring.security.web;
     requires YahooFinanceAPI;
     requires org.slf4j;
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.core;
+    requires java.jwt;
+    requires spring.security.config;
 }

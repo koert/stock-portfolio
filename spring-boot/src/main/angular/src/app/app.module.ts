@@ -21,6 +21,11 @@ import {TableModule} from "primeng/table";
 import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
 import { LoginComponent } from './login/login.component';
+import {JwtModule} from "@auth0/angular-jwt";
+
+export function tokenGetter() {
+  return localStorage.getItem("access_token");
+}
 
 @NgModule({
   declarations: [
@@ -30,6 +35,13 @@ import { LoginComponent } from './login/login.component';
   ],
   imports: [
     BrowserModule, BrowserAnimationsModule, FormsModule, HttpClientModule,
+    JwtModule.forRoot({
+      config: {
+        tokenGetter: tokenGetter,
+        whitelistedDomains: ["example.com", "portfolio.zencode.nl"],
+        blacklistedRoutes: ["example.com/examplebadroute/"]
+      }
+    }),
     AppRoutingModule,
 
     // PrimeNG
