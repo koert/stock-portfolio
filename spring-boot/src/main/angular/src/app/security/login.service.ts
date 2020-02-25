@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpResponse} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {map, tap} from "rxjs/operators";
+import * as jwt_decode from "jwt-decode";
 
 export class Credentials {
   userName: string;
@@ -13,12 +14,18 @@ export class Credentials {
   }
 }
 
+interface JwtToken {
+  sub: string;
+  exp: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class LoginService {
 
   static readonly authorizationKey = "authorization";
+  static readonly jwtExpiration = "jwtExpiration";
 
   private redirectUrl: string;
 
@@ -34,7 +41,16 @@ export class LoginService {
   }
 
   isLoggedIn(): boolean {
-    return localStorage.getItem(LoginService.authorizationKey) != null;
+    let authorization = localStorage.getItem(LoginService.authorizationKey);
+    let expiration = localStorage.getItem(LoginService.jwtExpiration);
+    let loggedIn = false;
+    if (authorization && expiration) {
+      let expirationTimestamp = parseInt(expiration);
+      if (new Date().valueOf() < expirationTimestamp) {
+        loggedIn = true;
+      }
+    }
+    return loggedIn;
   }
 
   registerRedirectUrl(url: string) {
@@ -47,6 +63,15 @@ export class LoginService {
 
   private static recordJwt(response: HttpResponse<void>): void {
     let authorizationHeader = response.headers.get(LoginService.authorizationKey);
-    localStorage.setItem(LoginService.authorizationKey, authorizationHeader);
+    let jwtToken = authorizationHeader;
+    if (jwtToken.startsWith("Bearer ")) {
+      jwtToken = jwtToken.substring("Bearer ".length);
+    }
+    let decodedToken: JwtToken = jwt_decode(jwtToken);
+    if (decodedToken) {
+      localStorage.setItem(LoginService.authorizationKey, authorizationHeader);
+      let expirationTimestamp = decodedToken.exp * 1000; // token expiration is in seconds (UTC), we use milliseconds
+      localStorage.setItem(LoginService.jwtExpiration, expirationTimestamp.toString());
+    }
   }
 }

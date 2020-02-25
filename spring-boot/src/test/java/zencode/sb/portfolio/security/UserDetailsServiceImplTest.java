@@ -19,6 +19,5 @@ class UserDetailsServiceImplTest {
   void testPassword() {
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     log.debug("Welkom123: {}", encoder.encode("Welkom123!"));
-    log.debug("Gk3ec9rAwCRMY5cM: {}", encoder.encode("Gk3ec9rAwCRMY5cM"));
   }
 }
