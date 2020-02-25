@@ -5,7 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PortfolioComponent } from './portfolio/portfolio.component';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {HttpClientModule} from "@angular/common/http";
+import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {ButtonModule} from "primeng/button";
 import {CalendarModule} from "primeng/calendar";
 import {ChartModule} from "primeng/chart";
@@ -22,6 +22,8 @@ import {ToastModule} from "primeng/toast";
 import {FormsModule} from "@angular/forms";
 import { LoginComponent } from './login/login.component';
 import {JwtModule} from "@auth0/angular-jwt";
+import { JwtLoginComponent } from './jwt-login/jwt-login.component';
+import {AuthorizationInterceptor} from "./security/AuthorizationInterceptor";
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -31,7 +33,8 @@ export function tokenGetter() {
   declarations: [
     AppComponent,
     PortfolioComponent,
-    LoginComponent
+    LoginComponent,
+    JwtLoginComponent
   ],
   imports: [
     BrowserModule, BrowserAnimationsModule, FormsModule, HttpClientModule,
@@ -52,6 +55,7 @@ export function tokenGetter() {
   providers: [
     // PrimeNg
     MessageService,
+    { provide: HTTP_INTERCEPTORS, useClass: AuthorizationInterceptor, multi: true },
   ],
   bootstrap: [AppComponent]
 })
