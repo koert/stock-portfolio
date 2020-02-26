@@ -3,6 +3,8 @@ import {StockService} from "../stock.service";
 import {HttpErrorResponse} from "@angular/common/http";
 import * as moment from "moment";
 import {CalculationUtil} from "../common/CalculationUtil";
+import {Portfolio, PortfolioService, StockPosition} from "../portfolio.service";
+import {NotificationService} from "../notification.service";
 
 export class PortfolioRow {
   rowIndex: number;
@@ -33,6 +35,32 @@ export class PortfolioRow {
     newRow.latestValue = row.latestValue;
     return newRow;
   }
+
+  static create(position: StockPosition): PortfolioRow {
+    let newRow = new PortfolioRow();
+    newRow.symbol = position.symbol;
+    // newRow.name = position.name;
+    newRow.amount = position.amount;
+    // newRow.currency = position.currency;
+    newRow.buyDate = position.buyDate;
+    newRow.buyPrice = position.buyPrice;
+    // newRow.buyValue = position.buyValue;
+    newRow.latestDate = position.latestDate;
+    newRow.latestPrice = position.latestPrice;
+    // newRow.latestValue = position.latestValue;
+    return newRow;
+  }
+
+  getStockPosition(): StockPosition {
+    let position = new StockPosition();
+    position.symbol = this.symbol;
+    position.amount = this.amount;
+    position.buyPrice = this.buyPrice;
+    position.buyDate = this.buyDate;
+    position.latestPrice = this.latestPrice;
+    position.latestDate = this.latestDate;
+    return position;
+  }
 }
 
 @Component({
@@ -47,7 +75,8 @@ export class PortfolioComponent implements OnInit {
   selectedPortfolioRow: PortfolioRow;
   editPortfolioRow: PortfolioRow;
 
-  constructor(private stockService: StockService) { }
+  constructor(private notificationService: NotificationService, private stockService: StockService,
+              private portfolioService: PortfolioService) { }
 
   ngOnInit() {
     let row1 = new PortfolioRow();
@@ -141,6 +170,22 @@ export class PortfolioComponent implements OnInit {
     this.selectedPortfolioRow = null;
     this.editPortfolioRow = new PortfolioRow();
     this.positionDialogVisible = true;
+  }
+
+  retrieve() {
+    this.portfolioService.retrieve().subscribe(portfolio => {
+      this.portfolioRows = portfolio.positions.map(position => PortfolioRow.create(position));
+    },
+      error => this.notificationService.error("Portfolio", "Error"));
+  }
+
+  save() {
+    let portfolio = new Portfolio();
+    portfolio.positions = this.portfolioRows.map(row => row.getStockPosition());
+    this.portfolioService.save(portfolio).subscribe(response => {
+      this.notificationService.info("Portfolio", "Saved")
+    },
+      error => this.notificationService.error("Portfolio", "Error"));
   }
 
   private calculateProfit(): void {

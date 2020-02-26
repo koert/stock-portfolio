@@ -31,7 +31,7 @@ open module portfolio {
     requires spring.context;
     requires spring.expression;
     requires spring.core;
-    requires spring.jcl;
+//    requires spring.jcl;
     requires spring.security.core;
     requires spring.security.web;
     requires YahooFinanceAPI;
@@ -41,4 +41,6 @@ open module portfolio {
     requires com.fasterxml.jackson.core;
     requires java.jwt;
     requires spring.security.config;
+    requires aws.java.sdk.dynamodb;
+    requires aws.java.sdk.core;
 }

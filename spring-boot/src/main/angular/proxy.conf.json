@@ -1,9 +1,13 @@
 {
-  "/stocks": {
+  "/login": {
     "target": "http://localhost:8080",
     "secure": false
   },
-  "/login": {
+  "/portfolio": {
+    "target": "http://localhost:8080",
+    "secure": false
+  },
+  "/stocks": {
     "target": "http://localhost:8080",
     "secure": false
   }
