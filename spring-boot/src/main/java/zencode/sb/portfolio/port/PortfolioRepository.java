@@ -61,7 +61,7 @@ public class PortfolioRepository {
           table.waitForActive();
           log.debug("Success.  Table status: " + table.getDescription().getTableStatus());
         }
-      } catch (InterruptedException e) {
+      } catch (InterruptedException|RuntimeException e) {
         e.printStackTrace();
       }
   }
@@ -125,24 +125,24 @@ public class PortfolioRepository {
 //       "latestDate" to dateFormat.format(position.latestDate)
 //    );
     Item item = new Item().withPrimaryKey("userId", userId, "symbol", position.symbol)
-        .with("amount", position.amount);
-//        .with("buyPrice", toString(position.buyPrice))
-//        .with("buyDate", toString(position.buyDate, dateFormat))
-//        .with("latestPrice", toString(position.latestPrice))
-//        .with("latestDate", toString(position.latestDate, dateFormat));
+        .with("amount", position.amount)
+        .with("buyPrice", toString(position.buyPrice))
+        .with("buyDate", toString(position.buyDate, dateFormat))
+        .with("latestPrice", toString(position.latestPrice))
+        .with("latestDate", toString(position.latestDate, dateFormat));
 
-    if (position.buyPrice != null) {
-      item.with("buyPrice", toString(position.buyPrice));
-    }
-    if (position.buyDate != null) {
-      item.with("buyDate", toString(position.buyDate, dateFormat));
-    }
-    if (position.latestPrice != null) {
-      item.with("latestPrice", toString(position.latestPrice));
-    }
-    if (position.latestDate != null) {
-      item.with("latestDate", toString(position.latestDate, dateFormat));
-    }
+//    if (position.buyPrice != null) {
+//      item.with("buyPrice", toString(position.buyPrice));
+//    }
+//    if (position.buyDate != null) {
+//      item.with("buyDate", toString(position.buyDate, dateFormat));
+//    }
+//    if (position.latestPrice != null) {
+//      item.with("latestPrice", toString(position.latestPrice));
+//    }
+//    if (position.latestDate != null) {
+//      item.with("latestDate", toString(position.latestDate, dateFormat));
+//    }
     table.putItem(item);
   }
 
