@@ -9,24 +9,21 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Koert Zeilstra
  * https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GettingStarted.Java.01.html
  * java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
  */
-@Repository
+@Component
 public class PortfolioRepository {
 
   private static final Logger log = LoggerFactory.getLogger(PortfolioRepository.class);
@@ -40,7 +37,7 @@ public class PortfolioRepository {
       try {
         DynamoDB dynamoDB = new DynamoDB(dynamoClient);
         Table existingTable = dynamoDB.getTable("stockposition");
-        if (existingTable == null) {
+        if (existingTable == null || existingTable.getDescription() == null) {
           List<KeySchemaElement> schema = Arrays.asList(
               new KeySchemaElement("userId", KeyType.HASH),
               new KeySchemaElement("symbol", KeyType.RANGE));
@@ -88,7 +85,6 @@ public class PortfolioRepository {
     ItemCollection<QueryOutcome> items = table.query(spec);
     List<StockPosition> positions = new ArrayList<>();
 
-    try {
       Iterator<Item> iterator = items.iterator();
       Item item = null;
       while (iterator.hasNext()) {
@@ -96,10 +92,10 @@ public class PortfolioRepository {
         StockPosition position = new StockPosition();
         position.symbol = item.getString("symbol");
         position.amount = item.getInt("amount");
-        position.buyPrice = new BigDecimal(item.getString("buyPrice"));
-        position.buyDate = dateFormat.parse(item.getString("buyDate"));
-        position.latestPrice = new BigDecimal(item.getString("latestPrice"));
-        position.latestDate = dateFormat.parse(item.getString("latestDate"));
+        position.buyPrice = toBigDecimal(item.getString("buyPrice"));
+        position.buyDate = toDate(item.getString("buyDate"), dateFormat);
+        position.latestPrice = toBigDecimal(item.getString("latestPrice"));
+        position.latestDate = toDate(item.getString("latestDate"), dateFormat);
         positions.add(position);
       }
 
@@ -113,9 +109,6 @@ public class PortfolioRepository {
 //        position.latestDate = dateFormat.parse(item.getString("latestDate"));
 //        positions.add(position);
 //      }
-    } catch (ParseException e) {
-
-    }
     return positions;
   }
 
@@ -132,11 +125,24 @@ public class PortfolioRepository {
 //       "latestDate" to dateFormat.format(position.latestDate)
 //    );
     Item item = new Item().withPrimaryKey("userId", userId, "symbol", position.symbol)
-        .with("amount", position.amount)
-        .with("buyPrice", position.buyPrice.toString())
-        .with("buyDate", dateFormat.format(position.buyDate))
-        .with("latestPrice", position.latestPrice.toString())
-        .with("latestDate", dateFormat.format(position.latestDate));
+        .with("amount", position.amount);
+//        .with("buyPrice", toString(position.buyPrice))
+//        .with("buyDate", toString(position.buyDate, dateFormat))
+//        .with("latestPrice", toString(position.latestPrice))
+//        .with("latestDate", toString(position.latestDate, dateFormat));
+
+    if (position.buyPrice != null) {
+      item.with("buyPrice", toString(position.buyPrice));
+    }
+    if (position.buyDate != null) {
+      item.with("buyDate", toString(position.buyDate, dateFormat));
+    }
+    if (position.latestPrice != null) {
+      item.with("latestPrice", toString(position.latestPrice));
+    }
+    if (position.latestDate != null) {
+      item.with("latestDate", toString(position.latestDate, dateFormat));
+    }
     table.putItem(item);
   }
 
@@ -144,6 +150,42 @@ public class PortfolioRepository {
     for (StockPosition position : positions) {
       savePosition(userId, position);
     }
+  }
+
+  private String toString(BigDecimal number) {
+    String string = null;
+    if (number != null) {
+      string = number.toString();
+    }
+    return string;
+  }
+
+  private String toString(Date date, DateFormat dateFormat) {
+    String string = null;
+    if (date != null) {
+      string = dateFormat.format(date);
+    }
+    return string;
+  }
+
+  private BigDecimal toBigDecimal(String string) {
+    BigDecimal number = null;
+    if (string != null) {
+      number = new BigDecimal(string);
+    }
+    return number;
+  }
+
+  private Date toDate(String string, DateFormat dateFormat) {
+    Date date = null;
+    if (string != null) {
+      try {
+        date = dateFormat.parse(string);
+      } catch (ParseException e) {
+        throw new RuntimeException("invalid date: " + string);
+      }
+    }
+    return date;
   }
 
 }
