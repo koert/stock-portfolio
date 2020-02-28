@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {StockService} from "../stock.service";
 import {HttpErrorResponse} from "@angular/common/http";
 import * as moment from "moment";
 import {CalculationUtil} from "../common/CalculationUtil";
 import {Portfolio, PortfolioService, StockPosition} from "../portfolio.service";
 import {NotificationService} from "../notification.service";
+import {SubSink} from "subsink";
 
 export class PortfolioRow {
   rowIndex: number;
@@ -68,7 +69,9 @@ export class PortfolioRow {
   templateUrl: './portfolio.component.html',
   styleUrls: ['./portfolio.component.scss']
 })
-export class PortfolioComponent implements OnInit {
+export class PortfolioComponent implements OnInit, OnDestroy {
+
+  private subs = new SubSink();
 
   portfolioRows: PortfolioRow[];
   positionDialogVisible: boolean = false;
@@ -104,6 +107,10 @@ export class PortfolioComponent implements OnInit {
     this.portfolioRows = [row1, row2];
   }
 
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
+
   refreshPortfolioPrices(): void {
     this.retrieveLatestPrice(this.portfolioRows, () => {
       this.calculateProfit();
@@ -119,7 +126,7 @@ export class PortfolioComponent implements OnInit {
   private retrieveLatestPrice(rows: PortfolioRow[], onCompleted: () => void) {
     if (rows.length > 0) {
       let row: PortfolioRow = rows[0];
-      this.stockService.getStockLatestPrice(row.symbol).subscribe(response => {
+      this.subs.add(this.stockService.getStockLatestPrice(row.symbol).subscribe(response => {
         let date = moment().startOf("day").toDate()
         row.latestDate = date;
         row.latestPrice = response.latestPrice;
@@ -134,7 +141,7 @@ export class PortfolioComponent implements OnInit {
           }
         },
         () => {}
-        );
+        ));
     } else {
       onCompleted();
     }
@@ -173,19 +180,19 @@ export class PortfolioComponent implements OnInit {
   }
 
   retrieve() {
-    this.portfolioService.retrieve().subscribe(portfolio => {
+    this.subs.add(this.portfolioService.retrieve().subscribe(portfolio => {
       this.portfolioRows = portfolio.positions.map(position => PortfolioRow.create(position));
     },
-      error => this.notificationService.error("Portfolio", "Error"));
+      error => this.notificationService.error("Portfolio", "Error")));
   }
 
   save() {
     let portfolio = new Portfolio();
     portfolio.positions = this.portfolioRows.map(row => row.getStockPosition());
-    this.portfolioService.save(portfolio).subscribe(response => {
+    this.subs.add(this.portfolioService.save(portfolio).subscribe(response => {
       this.notificationService.info("Portfolio", "Saved")
     },
-      error => this.notificationService.error("Portfolio", "Error"));
+      error => this.notificationService.error("Portfolio", "Error")));
   }
 
   private calculateProfit(): void {

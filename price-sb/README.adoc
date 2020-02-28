@@ -1,0 +1,241 @@
+
+
+----
+$ mvn clean package
+$ docker build -f src/main/docker/Dockerfile -t springio/portfolio .
+----
+
+----
+$ docker images
+REPOSITORY                                                       TAG                 IMAGE ID            CREATED             SIZE
+springio/portfolio                                               latest              948dbb691e7a        35 seconds ago      165MB
+quarkus/portfolio                                                latest              c4a585fce784        6 days ago          148MB
+----
+
+----
+$ docker run -i --rm -p 8081:8080 springio/portfolio
+2020-02-14 07:21:04.423  INFO 1 --- [           main] zencode.sb.portfolio.Application         : Started Application in 1.902 seconds (JVM running for 2.408)
+----
+
+== Spring Boot on AWS
+I created a very small application to retrieve stock prices with Quarkus - to compare with Spring Boot, I ported the application to Spring Boot.
+Porting is trivial, the annotations are slightly different, but the concepts and structures are the same.
+
+The big difference is the application startup time. Because the Quarkus application is compiled to native OS code, it starts up within milliseconds.
+The Spring Boot application runs on a Java Virtual Machine (JVM) and takes much more time to startup: 2.2 seconds. Memory usage seems about the same: about 60 MB.
+The performance of the Quarkus version is somewhat better, but this is difficult to compare, since it depends on another service to retrieve
+the stock price.
+
+The nice part of Spring Boot is that you can run your application easily in you IDE - this may be possible with Quarkus too, I have not seen it yet.
+
+== AWS deployment
+The way to deploy it on AWS ECS, is to package it in a Docker (Alpine based) container and run it that way.
+
+See more info about using the AWS ECS command line interface:
+https://docs.aws.amazon.com/AmazonECS/latest/userguide/ecs-cli-tutorial-fargate.html
+
+I created a Docker repository on AWS ECR:
+https://console.aws.amazon.com/ecr/repositories?region=eu-west-1
+
+----
+$ aws configure
+$ aws ecr create-repository --repository-name portfolio-sb
+{
+    "repository": {
+        "repositoryArn": "arn:aws:ecr:eu-west-1:925016407349:repository/portfolio-sb",
+        "registryId": "925016407349",
+        "repositoryName": "portfolio-sb",
+        "repositoryUri": "925016407349.dkr.ecr.eu-west-1.amazonaws.com/portfolio-sb",
+        "createdAt": 1582038128.0,
+        "imageTagMutability": "MUTABLE"
+    }
+}
+
+$ $(aws ecr get-login --no-include-email)
+$ docker images springio/portfolio
+$ docker tag 145fdaddf163 925016407349.dkr.ecr.eu-west-1.amazonaws.com/portfolio-sb
+$ docker push 925016407349.dkr.ecr.eu-west-1.amazonaws.com/portfolio-sb
+----
+
+----
+$ export AWS_ACCESS_KEY_ID=...
+$ export AWS_SECRET_ACCESS_KEY=...
+$ export AWS_DEFAULT_REGION=eu-west-1
+
+
+$ aws iam --region $AWS_DEFAULT_REGION create-role --role-name ecsTaskExecutionRole --assume-role-policy-document file://task-execution-assume-role.json
+----
+
+.Configure a cluster
+----
+$ ecs-cli configure --cluster portfolio-sb --default-launch-type FARGATE --config-name portfolio-sb --region $AWS_DEFAULT_REGION
+INFO[0000] Saved ECS CLI cluster configuration portfolio-sb.
+----
+
+You have to setup an Administrator user in IAM and create an access key. Easiest way is to use the IAM console.
+.Configure profile
+----
+$ ecs-cli configure profile --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY --profile-name portfolio-sb-profile
+INFO[0000] Saved ECS CLI profile configuration portfolio-sb-profile.
+----
+
+.Create the cluster (this takes a while)
+----
+$ ecs-cli up --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
+INFO[0000] Created cluster                               cluster=portfolio-sb region=eu-west-1
+INFO[0001] Waiting for your cluster resources to be created...
+INFO[0001] Cloudformation stack status                   stackStatus=CREATE_IN_PROGRESS
+VPC created: vpc-066fc23c0ccbea573
+Subnet created: subnet-037a40bf6d77c7e5b
+Subnet created: subnet-025672b8b74f237a1
+Cluster creation succeeded.
+----
+
+.Find group ID
+----
+$ aws ec2 describe-security-groups --filters Name=vpc-id,Values=<VPC-ID> --region $AWS_DEFAULT_REGION
+            "OwnerId": "925016407349",
+            "GroupId": "sg-002b0fab54fee2767",
+----
+
+.Authorize ports
+----
+$ aws ec2 authorize-security-group-ingress --group-id sg-01231231231231233 --protocol tcp --port 80 --cidr 0.0.0.0/0 --region $AWS_DEFAULT_REGION
+$ aws ec2 authorize-security-group-ingress --group-id sg-002b0fab54fee2767 --protocol tcp --port 8080 --cidr 0.0.0.0/0 --region $AWS_DEFAULT_REGION
+----
+
+.Bring the cluster up
+----
+$ ecs-cli compose --project-name portfolio-sb service up --create-log-groups --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
+INFO[0000] Using ECS task definition                     TaskDefinition="portfolio-sb:1"
+WARN[0000] Failed to create log group stockport-sb in eu-west-1: The specified log group already exists
+INFO[0000] Created an ECS service                        service=portfolio-sb taskDefinition="portfolio-sb:1"
+INFO[0001] Updated ECS service successfully              desiredCount=1 force-deployment=false service=portfolio-sb
+INFO[0016] (service portfolio-sb) has started 1 tasks: (task f871c1cc-2f30-40f8-b000-3e8403f16685).  timestamp="2020-02-18 15:09:34 +0000 UTC"
+INFO[0046] Service status                                desiredCount=1 runningCount=1 serviceName=portfolio-sb
+INFO[0046] (service portfolio-sb) has reached a steady state.  timestamp="2020-02-18 15:10:07 +0000 UTC"
+INFO[0046] ECS Service has reached a stable state        desiredCount=1 runningCount=1 serviceName=portfolio-sb
+----
+
+.Find out IP address
+----
+$ ecs-cli compose --project-name portfolio-sb service ps --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
+Name                                      State    Ports                          TaskDefinition  Health
+f871c1cc-2f30-40f8-b000-3e8403f16685/web  RUNNING  34.243.214.49:8080->8080/tcp  portfolio-sb:1  UNKNOWN
+----
+
+Now the application is running and you can access it at the listen IP address and port.
+
+.Examine the logs
+----
+$ ecs-cli logs --task-id 410b9015-2994-4e82-b4f4-01b18a3bb32b --follow --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
+----
+
+It runs on just one container - you can scale it up with a simple command.
+
+.Scaling - use 2 containers
+----
+$ ecs-cli compose --project-name portfolio-sb service scale 2 --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
+INFO[0000] Updated ECS service successfully              desiredCount=2 force-deployment=false service=portfolio-sb
+INFO[0000] Service status                                desiredCount=2 runningCount=1 serviceName=portfolio-sb
+INFO[0015] (service portfolio-sb) has started 1 tasks: (task d981d998-6a94-49b1-a177-51696bac8b37).  timestamp="2020-02-14 12:21:03 +0000 UTC"
+INFO[0046] Service status                                desiredCount=2 runningCount=2 serviceName=portfolio-sb
+INFO[0046] (service portfolio-sb) has reached a steady state.  timestamp="2020-02-14 12:21:26 +0000 UTC"
+INFO[0046] ECS Service has reached a stable state        desiredCount=2 runningCount=2 serviceName=portfolio-sb
+----
+
+.Find out scaled up containers and IP addresses
+----
+$ ecs-cli compose --project-name portfolio-sb service ps --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
+Name                                      State    Ports                          TaskDefinition  Health
+d981d998-6a94-49b1-a177-51696bac8b37/web  RUNNING  54.194.129.223:8080->8080/tcp  portfolio-sb:1  UNKNOWN
+f722cd93-7843-4dcd-8de6-44b56bff0a4d/web  RUNNING  54.229.109.153:8080->8080/tcp  portfolio-sb:1  UNKNOWN
+----
+
+You will now see 2 IP addresses and you can access both instances. Normally you would setup a load balancer that sends traffic to
+both instances. This is beyond the scope of this article.
+
+== Update new deployment
+
+Let's say that you made some improvements and want to deploy a new version. I could not find the option to do this with ecs-cli, but
+it is pretty straight forward with the "aws ecs update-service" command
+command.
+
+.Update image
+----
+$ mvn clean package
+
+$ docker build -f src/main/docker/Dockerfile -t springio/portfolio .
+
+$ docker images springio/portfolio
+REPOSITORY           TAG                 IMAGE ID            CREATED              SIZE
+springio/portfolio   latest              c19fc9f094d4        About a minute ago   123MB
+
+$ docker tag c19fc9f094d4 925016407349.dkr.ecr.eu-west-1.amazonaws.com/portfolio-sb
+
+$ docker push 925016407349.dkr.ecr.eu-west-1.amazonaws.com/portfolio-sb
+The push refers to repository [925016407349.dkr.ecr.eu-west-1.amazonaws.com/portfolio-sb]
+84b2eb70a05b: Layer already exists
+ceaf9e1ebef5: Layer already exists
+9b9b7f3d56a0: Layer already exists
+f1b5933fe4b5: Layer already exists
+latest: digest: sha256:9a557f18e95b17f87ce43f40291fdbb755c597e62af3854d79f9ca78ad70ddb5 size: 1159
+
+$ aws ecs update-service --service portfolio-sb --cluster portfolio-sb --force-new-deployment
+----
+
+The AWS ECS is now deploying the updated docker image. At first, it starts up two new instances, as you can see with the following command.
+----
+$ ecs-cli compose --project-name portfolio-sb service ps --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
+Name                                      State    Ports                          TaskDefinition  Health
+0157880c-b9f2-4969-ac33-8c5391ec3b1a/web  PENDING  10.0.1.98:8080->8080/tcp       portfolio-sb:1  UNKNOWN
+8f1c14a5-56fa-412e-a6b7-a804354188e5/web  PENDING  10.0.0.125:8080->8080/tcp      portfolio-sb:1  UNKNOWN
+d981d998-6a94-49b1-a177-51696bac8b37/web  RUNNING  54.194.129.223:8080->8080/tcp  portfolio-sb:1  UNKNOWN
+f722cd93-7843-4dcd-8de6-44b56bff0a4d/web  RUNNING  54.229.109.153:8080->8080/tcp  portfolio-sb:1  UNKNOWN
+----
+
+Later, you will see 4 instances running.
+----
+ $ ecs-cli compose --project-name portfolio-sb service ps --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
+Name                                      State    Ports                          TaskDefinition  Health
+0157880c-b9f2-4969-ac33-8c5391ec3b1a/web  RUNNING  34.244.227.110:8080->8080/tcp  portfolio-sb:1  UNKNOWN
+8f1c14a5-56fa-412e-a6b7-a804354188e5/web  RUNNING  34.245.139.193:8080->8080/tcp  portfolio-sb:1  UNKNOWN
+d981d998-6a94-49b1-a177-51696bac8b37/web  RUNNING  54.194.129.223:8080->8080/tcp  portfolio-sb:1  UNKNOWN
+f722cd93-7843-4dcd-8de6-44b56bff0a4d/web  RUNNING  54.229.109.153:8080->8080/tcp  portfolio-sb:1  UNKNOWN
+----
+
+Some time later, it stops the old instances and keeps the new 2 instances running.
+----
+$ ecs-cli compose --project-name portfolio-sb service ps --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
+Name                                      State    Ports                          TaskDefinition  Health
+0157880c-b9f2-4969-ac33-8c5391ec3b1a/web  RUNNING  34.244.227.110:8080->8080/tcp  portfolio-sb:1  UNKNOWN
+8f1c14a5-56fa-412e-a6b7-a804354188e5/web  RUNNING  34.245.139.193:8080->8080/tcp  portfolio-sb:1  UNKNOWN
+----
+
+== Clean up
+
+The clean up your experimental deployment, you first stop the instance and then delete the cluster.
+
+.Stop the instance
+----
+$ ecs-cli compose --project-name portfolio-sb service down --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
+INFO[0000] Updated ECS service successfully              desiredCount=0 force-deployment=false service=portfolio-sb
+INFO[0000] Service status                                desiredCount=0 runningCount=1 serviceName=portfolio-sb
+INFO[0015] Service status                                desiredCount=0 runningCount=0 serviceName=portfolio-sb
+INFO[0015] (service portfolio-sb) has stopped 1 running tasks: (task 410b9015-2994-4e82-b4f4-01b18a3bb32b).  timestamp="2020-02-14 12:09:15 +0000 UTC"
+INFO[0015] ECS Service has reached a stable state        desiredCount=0 runningCount=0 serviceName=portfolio-sb
+INFO[0015] Deleted ECS service                           service=portfolio-sb
+INFO[0015] ECS Service has reached a stable state        desiredCount=0 runningCount=0 serviceName=portfolio-sb
+----
+
+.Delete cluster
+----
+$ ecs-cli down --force --cluster-config portfolio-sb --ecs-profile portfolio-sb-profile
+INFO[0000] Waiting for your cluster resources to be deleted...
+INFO[0000] Cloudformation stack status                   stackStatus=DELETE_IN_PROGRESS
+INFO[0061] Deleted cluster                               cluster=portfolio-sb
+----
+
+== Conclusion
+I am not an AWS wizard, but I found it reasonably easy, although tideous (many commands) to setup a cluster and deploy the application.
+To make the application ready for real world use, there is much more to do, like user registration/login, load balancing, data persistence to a database, etc.

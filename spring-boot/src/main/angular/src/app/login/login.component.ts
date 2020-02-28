@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Credentials, LoginService} from "../security/login.service";
 import {NotificationService} from "../notification.service";
 import {SubSink} from "subsink";
@@ -12,7 +12,7 @@ import {Router} from "@angular/router";
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
 
   private subs = new SubSink();
 
@@ -23,6 +23,10 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit() {
+  }
+
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 
   login(): void {
