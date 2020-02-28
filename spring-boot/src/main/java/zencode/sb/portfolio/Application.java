@@ -33,7 +33,6 @@ public class Application {
 
   @Bean
   public RestTemplate restTemplate(RestTemplateBuilder builder) {
-    log.debug("restTemplate");
     return builder.build();
   }
 
