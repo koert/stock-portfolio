@@ -19,7 +19,7 @@ public class StockPricesEndpoint {
   @Autowired private YahooFinanceRepository yahooFinanceRepository;
 
   /**
-   * Lever abonnement.
+   * Retrieve latest price of stock.
    * @return Service response with status.
    */
   @RequestMapping(value="/{symbol}/latest", method = RequestMethod.GET)
