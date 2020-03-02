@@ -17,6 +17,6 @@ export class StockService {
   }
 
   getStockLatestPrice(symbol: string): Observable<StockLatestPriceResponse> {
-    return this.http.get<StockLatestPriceResponse>(`/stocks/${symbol}/latestPrice`);
+    return this.http.get<StockLatestPriceResponse>(`/prices/${symbol}/latest`);
   }
 }

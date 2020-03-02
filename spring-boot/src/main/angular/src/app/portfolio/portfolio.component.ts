@@ -75,6 +75,8 @@ export class PortfolioComponent implements OnInit, OnDestroy {
 
   portfolioRows: PortfolioRow[];
   positionDialogVisible: boolean = false;
+  editPositionDialogVisible: boolean = false;
+  editChartDialogVisible: boolean = false;
   selectedPortfolioRow: PortfolioRow;
   editPortfolioRow: PortfolioRow;
 
@@ -87,7 +89,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     row1.symbol = "AAPL";
     row1.amount = 10;
     row1.currency = "USD";
-    // row1.buyDate = ;
+    row1.buyDate = moment("2020-02-01").toDate();
     row1.buyPrice = 12.34;
     row1.buyValue = row1.amount * row1.buyPrice;
     // row1.latestDate = ;
@@ -98,7 +100,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     row2.symbol = "GOOG";
     row2.amount = 15;
     row2.currency = "USD";
-    // row1.buyDate = ;
+    row2.buyDate = moment("2020-01-15").toDate();
     row2.buyPrice = 123.45;
     row2.buyValue = row2.amount * row2.buyPrice;
     // row1.latestDate = ;
@@ -148,13 +150,22 @@ export class PortfolioComponent implements OnInit, OnDestroy {
   }
 
   showPositionDialog(row: PortfolioRow) {
-    this.positionDialogVisible = true;
+    this.editPositionDialogVisible = true;
     this.selectedPortfolioRow = row;
     this.editPortfolioRow = PortfolioRow.copyOf(row);
   }
 
-  positionEditCancel() {
+  showChartDialog(row: PortfolioRow) {
+    this.editChartDialogVisible = true;
+    this.selectedPortfolioRow = row;
+  }
+
+  positionDialogClose() {
     this.positionDialogVisible = false;
+  }
+
+  positionEditCancel() {
+    this.editPositionDialogVisible = false;
   }
 
   positionEditOk() {
@@ -170,13 +181,17 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     if (!this.selectedPortfolioRow) {
       this.portfolioRows.push(row);
     }
-    this.positionDialogVisible = false;
+    this.editPositionDialogVisible = false;
+  }
+
+  chartDialogClose() {
+    this.editChartDialogVisible = false;
   }
 
   addPosition() {
     this.selectedPortfolioRow = null;
     this.editPortfolioRow = new PortfolioRow();
-    this.positionDialogVisible = true;
+    this.editPositionDialogVisible = true;
   }
 
   retrieve() {

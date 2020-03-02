@@ -1,34 +1,48 @@
 package nl.zencode.port.stock.endpoint
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import yahoofinance.Stock
 
 /**
- * REST endpoint for stock info.
+ * REST endpoint for stock search and info.
  * @author Koert Zeilstra
  */
 @RestController
 @RequestMapping("/stocks")
-class StockEndpoint(@Autowired private val alphaVantageRepository: AlphaVantageRepository) {
+class StockEndpoint(@Autowired private val alphaVantageRepository: AlphaVantageRepository,
+                    @Autowired private val yahooFinanceRepository: YahooFinanceRepository) {
 
   @GetMapping("/search")
-  fun search(@RequestParam("isin") isin: String?): StockInfo? {
-    return if (isin != null) {
-      val searchResponse = alphaVantageRepository.searchByIsin(isin)
+  fun search(@RequestParam("keyword") keyword: String?): List<StockMatch> {
+    val stockInfoList: List<StockMatch> = if (keyword != null) {
+      val searchResponse = alphaVantageRepository.searchByKeyword(keyword)
       if (searchResponse != null && searchResponse.bestMatches.size > 0) {
-        val match = searchResponse.bestMatches[0]
-        StockInfo(isin, match.symbol, match.name, match.type, match.currency, match.region, match.marketOpen, match.marketClose, match.timezone)
+        searchResponse.bestMatches.map{ match -> toStockMatch(match) }
       } else {
-        null
+        emptyList()
       }
     } else {
-      null
+      emptyList()
+    }
+    return stockInfoList;
+  }
+
+  @GetMapping("/{symbol}/info")
+  fun info(@PathVariable("symbol") symbol: String): StockInfo? {
+    val stock: Stock? = yahooFinanceRepository.getStock(symbol);
+    return if (stock == null) {
+      return null;
+    } else {
+      toStockInfo(stock);
     }
   }
+
+  private fun toStockMatch(match: SearchMatch): StockMatch = StockMatch(match.symbol, match.name, match.currency)
+
+  private fun toStockInfo(stock: Stock): StockInfo  = StockInfo(stock.symbol, stock.name, stock.currency, stock.stockExchange)
 }
 
-data class StockInfo(val isin: String, val symbol: String, val name: String, val type: String, val currency: String,
-                     val region: String?, val marketOpen: String?, val marketClose: String?, val timezone: String?)
+data class StockMatch(val symbol: String, val name: String, val currency: String)
+
+data class StockInfo(val symbol: String, val name: String, val currency: String, val exchange: String?)

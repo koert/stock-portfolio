@@ -16,12 +16,12 @@ import org.springframework.web.client.RestTemplate
 class AlphaVantageRepository(
    @Autowired private val restTemplate: RestTemplate) {
 
-  fun searchByIsin(isin: String): SearchResponse? {
+  fun searchByKeyword(keyword: String): SearchResponse? {
 
     val headers = HttpHeaders();
     headers.set("Accept", "application/json");
     val searchResponse = restTemplate.exchange(
-       "https://www.alphavantage.co/query?function=SYMBOL_SEARCH&apikey=K2K7N6LONAH5BZMB&keywords=" + isin,
+       "https://www.alphavantage.co/query?function=SYMBOL_SEARCH&apikey=K2K7N6LONAH5BZMB&keywords=" + keyword,
        HttpMethod.GET, HttpEntity<HttpHeaders>(headers), SearchResponse::class.java);
     return searchResponse.body;
   }

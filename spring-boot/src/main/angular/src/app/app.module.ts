@@ -24,6 +24,7 @@ import { LoginComponent } from './login/login.component';
 import {JwtModule} from "@auth0/angular-jwt";
 import { JwtLoginComponent } from './jwt-login/jwt-login.component';
 import {AuthorizationInterceptor} from "./security/AuthorizationInterceptor";
+import {MomentModule} from "ngx-moment";
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -46,6 +47,7 @@ export function tokenGetter() {
       }
     }),
     AppRoutingModule,
+    MomentModule,
 
     // PrimeNG
     ButtonModule, CalendarModule, ChartModule, DialogModule, DropdownModule, FileUploadModule, InputTextModule,
