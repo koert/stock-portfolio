@@ -14,18 +14,18 @@ class StockEndpoint(@Autowired private val alphaVantageRepository: AlphaVantageR
                     @Autowired private val yahooFinanceRepository: YahooFinanceRepository) {
 
   @GetMapping("/search")
-  fun search(@RequestParam("keyword") keyword: String?): List<StockMatch> {
-    val stockInfoList: List<StockMatch> = if (keyword != null) {
+  fun search(@RequestParam("keyword") keyword: String?): StockSearchResponse {
+    val stockSearchResponse: StockSearchResponse = if (keyword != null) {
       val searchResponse = alphaVantageRepository.searchByKeyword(keyword)
       if (searchResponse != null && searchResponse.bestMatches.size > 0) {
-        searchResponse.bestMatches.map{ match -> toStockMatch(match) }
+        StockSearchResponse(searchResponse.bestMatches.map{ match -> toStockMatch(match) })
       } else {
-        emptyList()
+        StockSearchResponse(emptyList())
       }
     } else {
-      emptyList()
+      StockSearchResponse(emptyList())
     }
-    return stockInfoList;
+    return stockSearchResponse;
   }
 
   @GetMapping("/{symbol}/info")
@@ -46,3 +46,6 @@ class StockEndpoint(@Autowired private val alphaVantageRepository: AlphaVantageR
 data class StockMatch(val symbol: String, val name: String, val currency: String)
 
 data class StockInfo(val symbol: String, val name: String, val currency: String, val exchange: String?)
+
+data class StockSearchResponse(val matches: List<StockMatch>)
+

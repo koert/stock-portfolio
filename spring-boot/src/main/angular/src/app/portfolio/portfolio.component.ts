@@ -1,11 +1,12 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {StockService} from "../stock.service";
+import {StockMatch, StockService} from "../stock.service";
 import {HttpErrorResponse} from "@angular/common/http";
 import * as moment from "moment";
 import {CalculationUtil} from "../common/CalculationUtil";
 import {Portfolio, PortfolioService, StockPosition} from "../portfolio.service";
 import {NotificationService} from "../notification.service";
 import {SubSink} from "subsink";
+import {OverlayPanel} from "primeng/overlaypanel";
 
 export class PortfolioRow {
   rowIndex: number;
@@ -79,6 +80,8 @@ export class PortfolioComponent implements OnInit, OnDestroy {
   editChartDialogVisible: boolean = false;
   selectedPortfolioRow: PortfolioRow;
   editPortfolioRow: PortfolioRow;
+  symbolEntry: string;
+  stockMatches: StockMatch[];
 
   constructor(private notificationService: NotificationService, private stockService: StockService,
               private portfolioService: PortfolioService) { }
@@ -186,6 +189,29 @@ export class PortfolioComponent implements OnInit, OnDestroy {
 
   chartDialogClose() {
     this.editChartDialogVisible = false;
+  }
+
+  showSymbolEntryOverlay() {
+    this.symbolEntry = this.selectedPortfolioRow.symbol;
+  }
+
+  symbolSearch() {
+    if (this.symbolEntry) {
+      this.stockService.searchStock(this.symbolEntry).subscribe(searchResponse => {
+        this.stockMatches = searchResponse.matches;
+      });
+    } else {
+      this.notificationService.error("Add position", "Enter a symbol or name");
+    }
+  }
+
+  symbolSearchSelectRow(row: StockMatch, overlay: OverlayPanel) {
+    this.symbolEntry = row.symbol;
+    this.editPortfolioRow.symbol = row.symbol;
+    this.editPortfolioRow.name = row.name;
+    this.editPortfolioRow.currency = row.currency;
+    overlay.hide();
+    debugger;
   }
 
   addPosition() {

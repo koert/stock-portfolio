@@ -26,13 +26,12 @@ public class StockEndpoint {
    * @return Service response with status.
    */
   @RequestMapping(value="/search", method = RequestMethod.GET)
-  public zencode.sb.portfolio.price.StockLatestPriceResponse search(@RequestHeader("Authorization") String authorizationHeader,
+  public StockSearchResponse search(@RequestHeader("Authorization") String authorizationHeader,
       @RequestParam("keyword") String keyword) {
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", authorizationHeader);
-    ResponseEntity<zencode.sb.portfolio.price.StockLatestPriceResponse> responseEntity = restTemplate.exchange("http://localhost:8082/stocks/search?keyword=" + keyword,
-        HttpMethod.GET,
-        new HttpEntity<>(headers), zencode.sb.portfolio.price.StockLatestPriceResponse.class);
+    ResponseEntity<StockSearchResponse> responseEntity = restTemplate.exchange("http://localhost:8082/stocks/search?keyword=" + keyword,
+        HttpMethod.GET, new HttpEntity<>(headers), StockSearchResponse.class);
     return responseEntity.getBody();
   }
 
