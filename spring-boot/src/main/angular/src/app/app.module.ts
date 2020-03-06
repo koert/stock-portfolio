@@ -25,6 +25,7 @@ import {JwtModule} from "@auth0/angular-jwt";
 import { JwtLoginComponent } from './jwt-login/jwt-login.component';
 import {AuthorizationInterceptor} from "./security/AuthorizationInterceptor";
 import {MomentModule} from "ngx-moment";
+import { PriceDialogComponent } from './portfolio/price-dialog/price-dialog.component';
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -35,7 +36,8 @@ export function tokenGetter() {
     AppComponent,
     PortfolioComponent,
     LoginComponent,
-    JwtLoginComponent
+    JwtLoginComponent,
+    PriceDialogComponent
   ],
   imports: [
     BrowserModule, BrowserAnimationsModule, FormsModule, HttpClientModule,

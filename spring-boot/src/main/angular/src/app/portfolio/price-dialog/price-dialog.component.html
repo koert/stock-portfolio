@@ -1,0 +1,6 @@
+<p-dialog header="Prices {{symbol}} - {{name}}" [(visible)]="visible" width="600">
+  <p-chart type="line" [data]="data" (onDataSelect)="selectData($event)"></p-chart>
+  <div>
+    <p-selectButton [options]="rangeSelectionItems" [(ngModel)]="rangeSelection" (ngModelChange)="onRangeChange($event)"></p-selectButton>
+  </div>
+</p-dialog>

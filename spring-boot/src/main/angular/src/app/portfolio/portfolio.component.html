@@ -116,7 +116,8 @@
             <input type="text" pInputText [(ngModel)]="symbolEntry">
             <p-button icon="pi pi-search" (click)="symbolSearch()"></p-button>
           </div>
-          <p-table [value]="stockMatches" dataKey="symbol" [tableStyle]="{'table-layout': 'auto', 'width': 'auto'}">
+          <p-table [value]="stockMatches" dataKey="symbol" [paginator]="true" [rows]="4"
+                   [tableStyle]="{'table-layout': 'auto', 'width': 'auto'}">
             <ng-template pTemplate="header">
               <tr>
                 <th>Symbol</th>
@@ -190,3 +191,5 @@
     </div>
   </div>
 </p-dialog>
+
+<price-dialog #priceDialog></price-dialog>

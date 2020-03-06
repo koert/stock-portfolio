@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import zencode.sb.portfolio.security.AuthenticationSession;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Koert Zeilstra
  */
@@ -26,9 +29,6 @@ public class PriceEndpoint {
   @Autowired
   private AuthenticationSession authenticationSession;
 
-//  @Autowired
-//  private RestTemplateBuilder builder;
-
   /**
    * Retrieve latest price of stock.
    * @return Service response with status.
@@ -36,10 +36,6 @@ public class PriceEndpoint {
   @RequestMapping(value="/{symbol}/latest", method = RequestMethod.GET)
   public StockLatestPriceResponse latestPrice(@RequestHeader("Authorization") String authorizationHeader,
       @PathVariable("symbol") String symbol) {
-//    builder.defaultHeader("Authorization", authorizationHeader);
-//    RestTemplate restTemplate = builder.build();
-//    StockLatestPriceResponse response = restTemplate.getForObject("http://localhost:8081/stockprices/{symbol}/latest",
-//        StockLatestPriceResponse.class, symbol);
 
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", authorizationHeader);
@@ -47,13 +43,40 @@ public class PriceEndpoint {
         HttpMethod.GET,
         new HttpEntity<>(headers), StockLatestPriceResponse.class, symbol);
     return responseEntity.getBody();
-//
-//    String userId = (String) authenticationSession.getAuthentication().getPrincipal();
-//    log.debug("getPortfolio {}", userId);
-//    List<StockPosition> stockPositions = portfolioRepository.retrievePositions(userId);
-//    PortfolioMessage portfolio = new PortfolioMessage();
-//    portfolio.positions = stockPositions;
-//    return ResponseEntity.ok().body(portfolio);
+  }
+
+  /**
+   * Retrieve latest price of stock.
+   * @return Service response with status.
+   */
+  @RequestMapping(value="/{symbol}/history", method = RequestMethod.GET)
+  public StockPriceHistoryResponse history(@RequestHeader("Authorization") String authorizationHeader,
+      @PathVariable("symbol") String symbol,
+      @RequestParam("startDate") String startDateParam,
+      @RequestParam("endDate") String endDateParam,
+      @RequestParam("interval") String intervalParam) {
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Authorization", authorizationHeader);
+    List<String> queryParameters = new ArrayList<>();
+    if (startDateParam != null) {
+      queryParameters.add("startDate=" + startDateParam);
+    }
+    if (endDateParam != null) {
+      queryParameters.add("endDate=" + endDateParam);
+    }
+    if (intervalParam != null) {
+      queryParameters.add("interval=" + intervalParam);
+    }
+    String queryString = "";
+    if (queryParameters.size() > 0) {
+      queryString = "?" + String.join("&", queryParameters);
+    }
+    ResponseEntity<StockPriceHistoryResponse> responseEntity = restTemplate.exchange(
+        "http://localhost:8081/stockprices/{symbol}/history" + queryString,
+        HttpMethod.GET,
+        new HttpEntity<>(headers), StockPriceHistoryResponse.class, symbol);
+    return responseEntity.getBody();
   }
 
 

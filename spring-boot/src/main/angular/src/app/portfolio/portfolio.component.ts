@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {StockMatch, StockService} from "../stock.service";
 import {HttpErrorResponse} from "@angular/common/http";
 import * as moment from "moment";
@@ -7,6 +7,7 @@ import {Portfolio, PortfolioService, StockPosition} from "../portfolio.service";
 import {NotificationService} from "../notification.service";
 import {SubSink} from "subsink";
 import {OverlayPanel} from "primeng/overlaypanel";
+import {PriceDialogComponent} from "./price-dialog/price-dialog.component";
 
 export class PortfolioRow {
   rowIndex: number;
@@ -71,6 +72,8 @@ export class PortfolioRow {
   styleUrls: ['./portfolio.component.scss']
 })
 export class PortfolioComponent implements OnInit, OnDestroy {
+
+  @ViewChild("priceDialog", { static: false }) private priceDialog: PriceDialogComponent;
 
   private subs = new SubSink();
 
@@ -161,8 +164,10 @@ export class PortfolioComponent implements OnInit, OnDestroy {
   }
 
   showChartDialog(row: PortfolioRow) {
-    this.editChartDialogVisible = true;
-    this.selectedPortfolioRow = row;
+    // this.editChartDialogVisible = true;
+    // this.selectedPortfolioRow = row;
+
+    this.priceDialog.show(row.symbol, row.name);
   }
 
   positionDialogClose() {
@@ -180,6 +185,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     }
     row.symbol = this.editPortfolioRow.symbol;
     row.name = this.editPortfolioRow.name;
+    row.currency = this.editPortfolioRow.currency;
     row.amount = this.editPortfolioRow.amount;
     row.buyDate = this.editPortfolioRow.buyDate;
     row.buyPrice = this.editPortfolioRow.buyPrice;
