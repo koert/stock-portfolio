@@ -80,7 +80,6 @@ export class PortfolioComponent implements OnInit, OnDestroy {
   portfolioRows: PortfolioRow[];
   positionDialogVisible: boolean = false;
   editPositionDialogVisible: boolean = false;
-  editChartDialogVisible: boolean = false;
   selectedPortfolioRow: PortfolioRow;
   editPortfolioRow: PortfolioRow;
   symbolEntry: string;
@@ -194,10 +193,6 @@ export class PortfolioComponent implements OnInit, OnDestroy {
       this.portfolioRows.push(row);
     }
     this.editPositionDialogVisible = false;
-  }
-
-  chartDialogClose() {
-    this.editChartDialogVisible = false;
   }
 
   showSymbolEntryOverlay() {

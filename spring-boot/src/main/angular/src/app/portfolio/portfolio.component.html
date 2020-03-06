@@ -166,30 +166,4 @@
   </div>
 </p-dialog>
 
-<p-dialog header="Portfolio position" [(visible)]="editChartDialogVisible">
-  <table *ngIf="selectedPortfolioRow">
-    <tr>
-      <th>Stock</th>
-      <td>{{selectedPortfolioRow.symbol}} - {{selectedPortfolioRow.name}}</td>
-    </tr>
-    <tr>
-      <th>Amount</th>
-      <td>{{selectedPortfolioRow.amount}}</td>
-    </tr>
-    <tr>
-      <th>Purchase</th>
-      <td>{{selectedPortfolioRow.buyDate | amDateFormat: 'DD/MM/YYYY'}} at {{selectedPortfolioRow.buyPrice | currency: selectedPortfolioRow.currency}}</td>
-    </tr>
-    <tr>
-      <th></th>
-      <td></td>
-    </tr>
-  </table>
-  <div class="buttonBar">
-    <div class="alignRight">
-      <p-button label="Close" icon="pi pi-check" (onClick)="chartDialogClose()"></p-button>
-    </div>
-  </div>
-</p-dialog>
-
 <price-dialog #priceDialog></price-dialog>
