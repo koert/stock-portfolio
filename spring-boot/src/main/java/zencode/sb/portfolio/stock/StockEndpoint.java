@@ -1,6 +1,7 @@
 package zencode.sb.portfolio.stock;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,6 +18,8 @@ import yahoofinance.Stock;
 @RequestMapping("/stocks")
 public class StockEndpoint {
 
+  @Value("${client.stocks.url}") private String clientStocksUrl;
+
   @Autowired private RestTemplate restTemplate;
 
   @Autowired private YahooFinanceRepository yahooFinanceRepository;
@@ -30,7 +33,7 @@ public class StockEndpoint {
       @RequestParam("keyword") String keyword) {
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", authorizationHeader);
-    ResponseEntity<StockSearchResponse> responseEntity = restTemplate.exchange("http://localhost:8082/stocks/search?keyword=" + keyword,
+    ResponseEntity<StockSearchResponse> responseEntity = restTemplate.exchange(clientStocksUrl + "/stocks/search?keyword=" + keyword,
         HttpMethod.GET, new HttpEntity<>(headers), StockSearchResponse.class);
     return responseEntity.getBody();
   }
@@ -44,7 +47,7 @@ public class StockEndpoint {
       @PathVariable("symbol") String symbol) {
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", authorizationHeader);
-    ResponseEntity<zencode.sb.portfolio.price.StockLatestPriceResponse> responseEntity = restTemplate.exchange("http://localhost:8082/stocks/{symbol}/info",
+    ResponseEntity<zencode.sb.portfolio.price.StockLatestPriceResponse> responseEntity = restTemplate.exchange(clientStocksUrl + "/{symbol}/info",
         HttpMethod.GET,
         new HttpEntity<>(headers), zencode.sb.portfolio.price.StockLatestPriceResponse.class, symbol);
     return responseEntity.getBody();

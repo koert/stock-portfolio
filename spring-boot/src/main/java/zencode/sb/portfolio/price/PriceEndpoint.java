@@ -3,6 +3,7 @@ package zencode.sb.portfolio.price;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,6 +24,8 @@ public class PriceEndpoint {
 
   private static final Logger log = LoggerFactory.getLogger(PriceEndpoint.class);
 
+  @Value("${client.prices.url}") private String clientPricesUrl;
+
   @Autowired
   private RestTemplate restTemplate;
 
@@ -39,7 +42,7 @@ public class PriceEndpoint {
 
     HttpHeaders headers = new HttpHeaders();
     headers.set("Authorization", authorizationHeader);
-    ResponseEntity<StockLatestPriceResponse> responseEntity = restTemplate.exchange("http://localhost:8081/stockprices/{symbol}/latest",
+    ResponseEntity<StockLatestPriceResponse> responseEntity = restTemplate.exchange(clientPricesUrl + "/stockprices/{symbol}/latest",
         HttpMethod.GET,
         new HttpEntity<>(headers), StockLatestPriceResponse.class, symbol);
     return responseEntity.getBody();
@@ -73,7 +76,7 @@ public class PriceEndpoint {
       queryString = "?" + String.join("&", queryParameters);
     }
     ResponseEntity<StockPriceHistoryResponse> responseEntity = restTemplate.exchange(
-        "http://localhost:8081/stockprices/{symbol}/history" + queryString,
+        clientPricesUrl + "/stockprices/{symbol}/history" + queryString,
         HttpMethod.GET,
         new HttpEntity<>(headers), StockPriceHistoryResponse.class, symbol);
     return responseEntity.getBody();
