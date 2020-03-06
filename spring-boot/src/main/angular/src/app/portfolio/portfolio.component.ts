@@ -90,6 +90,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     let row1 = new PortfolioRow();
     row1.rowIndex = 0;
     row1.symbol = "AAPL";
+    row1.name = "Apple";
     row1.amount = 10;
     row1.currency = "USD";
     row1.buyDate = moment("2020-02-01").toDate();
@@ -101,6 +102,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     let row2 = new PortfolioRow();
     row2.rowIndex = 0;
     row2.symbol = "GOOG";
+    row2.name = "Alphabet";
     row2.amount = 15;
     row2.currency = "USD";
     row2.buyDate = moment("2020-01-15").toDate();
@@ -177,6 +179,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
       row = new PortfolioRow();
     }
     row.symbol = this.editPortfolioRow.symbol;
+    row.name = this.editPortfolioRow.name;
     row.amount = this.editPortfolioRow.amount;
     row.buyDate = this.editPortfolioRow.buyDate;
     row.buyPrice = this.editPortfolioRow.buyPrice;
@@ -192,7 +195,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
   }
 
   showSymbolEntryOverlay() {
-    this.symbolEntry = this.selectedPortfolioRow.symbol;
+    this.symbolEntry = this.editPortfolioRow.symbol;
   }
 
   symbolSearch() {
@@ -211,7 +214,6 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     this.editPortfolioRow.name = row.name;
     this.editPortfolioRow.currency = row.currency;
     overlay.hide();
-    debugger;
   }
 
   addPosition() {

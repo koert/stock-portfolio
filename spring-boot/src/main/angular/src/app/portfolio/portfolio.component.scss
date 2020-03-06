@@ -1,5 +1,6 @@
 .buttonBar {
   display: flex;
+  margin: 2px 0;
   p-button {
     margin: 0 2pt;
   }
@@ -13,5 +14,12 @@
     * {
       margin: 0 2pt;
     }
+  }
+}
+
+.buttonColumn {
+  padding: 2px 0;
+  p-button {
+    margin: 0 2pt;
   }
 }

@@ -1,5 +1,4 @@
 <p-panel header="Portfolio">
-  <p-button label="Refresh prices" icon="pi pi-download" (onClick)="refreshPortfolioPrices()"></p-button>
   <p-table [value]="portfolioRows" dataKey="rowIndex" [tableStyle]="{'table-layout': 'auto', 'width': 'auto'}">
     <ng-template pTemplate="header">
       <tr>
@@ -60,23 +59,31 @@
         <td class="price">{{row.latestValue | currency : row.currency}}</td>
         <td class="price">{{row.profit | currency : row.currency}}</td>
         <td class="price">{{row.annualizedProfit | percent : '1.1'}}</td>
-        <td class="buttonBar">
+        <td class="buttonColumn">
           <p-button icon="pi pi-chart-line" (onClick)="showChartDialog(row)"></p-button>
           <p-button icon="pi pi-pencil" (onClick)="showPositionDialog(row)"></p-button>
         </td>
       </tr>
     </ng-template>
   </p-table>
-  <p-button label="Add position" icon="pi pi-plus" (onClick)="addPosition()"></p-button>
-  <p-button label="Save" icon="pi pi-save" (onClick)="save()"></p-button>
-  <p-button label="Retrieve" icon="pi pi-save" (onClick)="retrieve()"></p-button>
+  <div class="buttonBar">
+    <div class="alignLeft">
+      <p-button label="Refresh prices" icon="pi pi-download" (onClick)="refreshPortfolioPrices()"></p-button>
+    </div>
+    <div class="alignRight">
+      <p-button label="Add position" icon="pi pi-plus" (onClick)="addPosition()"></p-button>
+    </div>
+  </div>
+
+<!--  <p-button label="Save" icon="pi pi-save" (onClick)="save()"></p-button>-->
+<!--  <p-button label="Retrieve" icon="pi pi-save" (onClick)="retrieve()"></p-button>-->
 </p-panel>
 
 <p-dialog header="Portfolio position" [(visible)]="positionDialogVisible">
   <table *ngIf="editPortfolioRow">
     <tr>
       <th>Symbol/name</th>
-      <td>{{editPortfolioRow.symbol}} - {{editPortfolioRow.name}}</td>
+      <td>{{editPortfolioRow.symbol}}<span *ngIf="editPortfolioRow.name"> - {{editPortfolioRow.name}}</span></td>
     </tr>
     <tr>
       <th>Amount</th>
@@ -103,7 +110,7 @@
     <tr>
       <th>Symbol</th>
       <td>
-        <div>{{editPortfolioRow.symbol}} - {{editPortfolioRow.name}}</div>
+        <div>{{editPortfolioRow.symbol}}<span *ngIf="editPortfolioRow.name"> - {{editPortfolioRow.name}}</span></div>
         <p-overlayPanel #symbolOverlay appendTo="body">
           <div style="display: flex">
             <input type="text" pInputText [(ngModel)]="symbolEntry">
