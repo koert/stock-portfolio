@@ -40,7 +40,7 @@ export class StockService {
   }
 
   getStockLatestPrice(symbol: string): Observable<StockLatestPriceResponse> {
-    return this.http.get<StockLatestPriceResponse>(this.configService.makeServiceUrl(`/prices/${symbol}/latest`));
+    return this.http.get<StockLatestPriceResponse>(this.configService.makePriceServiceUrl(`/prices/${symbol}/latest`));
   }
 
   getPriceHistory(symbol: string, startDate: Date, endDate: Date, interval: string): Observable<StockPriceHistoryResponse> {
@@ -48,11 +48,11 @@ export class StockService {
     query.add("startDate", moment(startDate).format("YYYY-MM-DD"));
     query.add("endDate", moment(endDate).format("YYYY-MM-DD"));
     query.add("interval", interval);
-    return this.http.get<StockPriceHistoryResponse>(this.configService.makeServiceUrl(`/prices/${symbol}/history` + query.buildQuery()));
+    return this.http.get<StockPriceHistoryResponse>(this.configService.makePriceServiceUrl(`/prices/${symbol}/history` + query.buildQuery()));
   }
 
   searchStock(keyword: string): Observable<StockSearchResponse> {
-    return this.http.get<StockSearchResponse>(this.configService.makeServiceUrl(`/stocks/search?keyword=${keyword}`));
+    return this.http.get<StockSearchResponse>(this.configService.makeStockServiceUrl(`/stocks/search?keyword=${keyword}`));
   }
 
 }

@@ -67,6 +67,16 @@
       <artifactId>quarkus-resteasy-jsonb</artifactId>
       <version>${quarkus.version}</version>
     </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest-client</artifactId>
+      <version>${quarkus.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-jwt</artifactId>
+      <version>${quarkus.version}</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
