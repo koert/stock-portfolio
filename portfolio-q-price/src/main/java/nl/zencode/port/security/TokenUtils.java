@@ -33,7 +33,7 @@ public class TokenUtils {
   public static String generateTokenString(String jsonResName, Map<String, Long> timeClaims)
       throws Exception {
     // Use the test private key associated with the test public key for a valid signature
-    PrivateKey pk = readPrivateKey("/privateKey.pem");
+    PrivateKey pk = readPrivateKey("/META-INF/resources/privateKey.pem");
     return generateTokenString(pk, "/privateKey.pem", jsonResName, timeClaims);
   }
 
@@ -56,7 +56,7 @@ public class TokenUtils {
 
     String signedToken = null;
     try {
-      PrivateKey privateKey = readPrivateKey("/privateKey.pem");
+      PrivateKey privateKey = readPrivateKey("/META-INF/resources/privateKey.pem");
 
       long currentTimeMillis = System.currentTimeMillis() / 1000;
       signedToken = Jwt.claims()

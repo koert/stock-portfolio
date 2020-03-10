@@ -30,7 +30,7 @@ public class LoginEndpoint {
       token = TokenUtils.generateTokenString(userPassword.userName);
       LoginResponse loginResponse = new LoginResponse();
       loginResponse.jwt = token;
-      response = Response.ok(loginResponse).header("Authorization", "Bearer " + token).build();
+      response = Response.ok().entity(loginResponse).header("Authorization", "Bearer " + token).build();
     } else {
       response = Response.status(Response.Status.NOT_FOUND).build();
     }

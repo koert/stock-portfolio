@@ -1,8 +1,11 @@
 package nl.zencode.port.q.stock;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 /**
  * @author Koert Zeilstra
  */
+@RegisterForReflection
 public class StockSearchMatch {
   public String symbol;
   public String name;

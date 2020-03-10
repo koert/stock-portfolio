@@ -1,10 +1,13 @@
 package nl.zencode.port.q.price;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 import java.math.BigDecimal;
 
 /**
  * @author Koert Zeilstra
  */
+@RegisterForReflection
 public class StockLatestPriceResponse {
   public String symbol;
   public BigDecimal latestPrice;
