@@ -1,0 +1,25 @@
+.buttonBar {
+  display: flex;
+  margin: 2px 0;
+  p-button {
+    margin: 0 2pt;
+  }
+
+  .alignRight {
+    flex: 1;
+    display: flex;
+    flex-direction: row-reverse;
+    align-content: flex-end;
+
+    * {
+      margin: 0 2pt;
+    }
+  }
+}
+
+.buttonColumn {
+  padding: 2px 0;
+  p-button {
+    margin: 0 2pt;
+  }
+}

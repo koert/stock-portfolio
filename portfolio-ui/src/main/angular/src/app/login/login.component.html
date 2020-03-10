@@ -1,0 +1,18 @@
+<p-panel header="Login">
+  <table>
+    <tr>
+      <th>User ID</th>
+      <td><input type="text" pInputText [(ngModel)]="userName"/></td>
+    </tr>
+    <tr>
+      <th>password</th>
+      <td><input type="password" pInputText [(ngModel)]="password"/></td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>
+        <p-button label="Login" icon="pi pi-check" (onClick)="login()"></p-button>
+      </td>
+    </tr>
+  </table>
+</p-panel>
