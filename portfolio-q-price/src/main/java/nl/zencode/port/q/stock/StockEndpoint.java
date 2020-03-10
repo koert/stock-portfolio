@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 @Path("/stocks")
 public class StockEndpoint {
 
-  @Inject private AlphaVantageRepository alphaVantageRepository;
-  @Inject private YahooFinanceRepository yahooFinanceRepository;
+  @Inject AlphaVantageRepository alphaVantageRepository;
+  @Inject YahooFinanceRepository yahooFinanceRepository;
 
   @GET
   @Path("/search")

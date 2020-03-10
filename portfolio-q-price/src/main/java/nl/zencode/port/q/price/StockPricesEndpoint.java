@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Path("/stockprices")
 public class StockPricesEndpoint {
 
-  @Inject private YahooFinanceRepository yahooFinanceRepository;
+  @Inject YahooFinanceRepository yahooFinanceRepository;
 
   @GET
   @Path("/{symbol}/latest")

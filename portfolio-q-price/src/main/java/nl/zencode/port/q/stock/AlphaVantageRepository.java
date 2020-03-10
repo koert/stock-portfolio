@@ -13,7 +13,7 @@ public class AlphaVantageRepository {
 
   @Inject
   @RestClient
-  private AlphaVantageClient alphaVantageClient;
+  AlphaVantageClient alphaVantageClient;
 
   SearchResponse searchByKeyword(String keyword) {
     return alphaVantageClient.searchByKeyword("K2K7N6LONAH5BZMB", "SYMBOL_SEARCH", keyword);

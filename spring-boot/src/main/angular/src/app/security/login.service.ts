@@ -3,6 +3,7 @@ import {HttpClient, HttpResponse} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {map, tap} from "rxjs/operators";
 import * as jwt_decode from "jwt-decode";
+import {ConfigService} from "../common/config.service";
 
 export class Credentials {
   userName: string;
@@ -19,6 +20,10 @@ interface JwtToken {
   exp: number;
 }
 
+export class LoginResponse {
+  jwt: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -29,11 +34,11 @@ export class LoginService {
 
   private redirectUrl: string;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private configService: ConfigService) {
   }
 
-  login(credentials: Credentials): Observable<void> {
-    return this.http.post<void>("/login", credentials, {observe: "response"})
+  login(credentials: Credentials): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(this.configService.makeLoginServiceUrl("/security/login"), credentials, {observe: "response"})
       .pipe(
         tap(LoginService.recordJwt),
         map(response => response.body)
@@ -61,11 +66,15 @@ export class LoginService {
     return this.redirectUrl;
   }
 
-  private static recordJwt(response: HttpResponse<void>): void {
+  private static recordJwt(response: HttpResponse<LoginResponse>): void {
     let authorizationHeader = response.headers.get(LoginService.authorizationKey);
     let jwtToken = authorizationHeader;
-    if (jwtToken.startsWith("Bearer ")) {
-      jwtToken = jwtToken.substring("Bearer ".length);
+    if (jwtToken) {
+      if (jwtToken.startsWith("Bearer ")) {
+        jwtToken = jwtToken.substring("Bearer ".length);
+      }
+    } else {
+      jwtToken = response.body.jwt;
     }
     let decodedToken: JwtToken = jwt_decode(jwtToken);
     if (decodedToken) {

@@ -22,6 +22,16 @@ export class ConfigService {
     return url;
   }
 
+  makeLoginServiceUrl(endpoint: string) {
+    let url = this.priceServiceUrl;
+    if (endpoint.startsWith("/")) {
+      url = url + endpoint;
+    } else {
+      url = url + "/" + endpoint;
+    }
+    return url;
+  }
+
   makePriceServiceUrl(endpoint: string) {
     let url: string;
     if (endpoint.startsWith("/")) {
