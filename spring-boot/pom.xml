@@ -133,6 +133,31 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.github.nikodem911</groupId>
+                <artifactId>s3-upload-maven-plugin</artifactId>
+                <version>1.5.1</version>
+                <configuration>
+                    <bucketName>portfolio-ui</bucketName>
+                    <source>src/main/resources/static/</source>
+                    <destination>a</destination>
+                    <recursive>true</recursive>
+                </configuration>
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>angular-upload</id>-->
+<!--                        <phase>package</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>s3-upload</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <bucket>portfolio-ui</bucket>-->
+<!--                            <path>/src/main/resources/static</path>-->
+<!--                        </configuration>mvn package-->
+
+<!--                    </execution>-->
+<!--                <executions>-->
+            </plugin>
         </plugins>
     </build>
 

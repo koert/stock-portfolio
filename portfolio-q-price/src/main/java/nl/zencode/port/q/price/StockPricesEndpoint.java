@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 /**
  * @author Koert Zeilstra
  */
-@Path("/stockprices")
+@Path("/prices")
 public class StockPricesEndpoint {
 
   @Inject YahooFinanceRepository yahooFinanceRepository;
