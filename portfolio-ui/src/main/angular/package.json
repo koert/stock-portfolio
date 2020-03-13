@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
+    "buildProd": "ng build --prod --base-href /ui --deploy-url /ui/",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",

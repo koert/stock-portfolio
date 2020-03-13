@@ -1,5 +1,6 @@
-package nl.zencode.port.q.price;
+package nl.zencode.port.q;
 
+import nl.zencode.port.q.stock.YahooException;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 
@@ -25,4 +26,5 @@ public class YahooFinanceRepository {
       throw new YahooException(e);
     }
   }
+
 }

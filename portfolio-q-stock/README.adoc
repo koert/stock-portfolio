@@ -1,0 +1,10 @@
+
+
+----
+mvn clean package -Dnative
+sam local start-api --template sam.native.yaml
+sam package --template-file sam.native.yaml --output-template-file packaged.yaml --s3-bucket portfolio-stock
+sam deploy --template-file packaged.yaml --capabilities CAPABILITY_IAM --stack-name portfolio-stock-stack
+aws cloudformation describe-stack-events --stack-name portfolio-stock-stack
+sam logs --name PortfolioQStockNativeFunction --stack-name portfolio-stock-stack --tail
+----

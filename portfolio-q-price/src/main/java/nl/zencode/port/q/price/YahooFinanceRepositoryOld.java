@@ -1,4 +1,4 @@
-package nl.zencode.port.q.stock;
+package nl.zencode.port.q.price;
 
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
@@ -11,7 +11,7 @@ import java.io.IOException;
  * @author Koert Zeilstra
  */
 @ApplicationScoped
-public class YahooFinanceRepository {
+public class YahooFinanceRepositoryOld {
 
   /**
    * Retrieve stock information.

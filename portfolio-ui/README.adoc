@@ -1,0 +1,8 @@
+
+----
+(cd src/main/angular; ng build --prod --base-href /ui --deploy-url /ui/)
+mvn s3-upload:s3-upload
+----
+
+https://portfolio-ui.s3-eu-west-1.amazonaws.com/login
+

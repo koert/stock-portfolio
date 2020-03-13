@@ -41,34 +41,13 @@ public class StockEndpoint {
   }
 
   @GET
-  @Path("/{symbol}/info0")
+  @Path("/{symbol}/info")
   public StockInfo info(@PathParam("symbol") String symbol) {
     Stock stock = yahooFinanceRepository.getStock(symbol);
     if (stock == null) {
       throw new NotFoundException("Stock not found: " + symbol);
     }
     return toStockInfo(stock);
-  }
-
-  @GET
-  @Path("/{symbol}/info")
-  @Produces(MediaType.APPLICATION_JSON)
-  public StockInfo info1(@PathParam("symbol") String symbol) {
-    StockInfo stock = yahooFinanceRepository.getStock1(symbol);
-    if (stock == null) {
-      throw new NotFoundException("Stock not found: " + symbol);
-    }
-    return stock;
-  }
-
-  @GET
-  @Path("/{symbol}/info2")
-  public StockInfo info2(@PathParam("symbol") String symbol) {
-    StockInfo stock = yahooFinanceRepository.getStock2(symbol);
-    if (stock == null) {
-      throw new NotFoundException("Stock not found: " + symbol);
-    }
-    return stock;
   }
 
   private StockSearchMatch toStockMatch(SearchMatch match) {

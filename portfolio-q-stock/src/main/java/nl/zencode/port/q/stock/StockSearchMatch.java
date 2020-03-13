@@ -2,26 +2,23 @@ package nl.zencode.port.q.stock;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
-import java.math.BigDecimal;
-
 /**
  * @author Koert Zeilstra
  */
 @RegisterForReflection
-public class StockInfo {
+public class StockSearchMatch {
   public String symbol;
   public String name;
   public String currency;
-  public String exchange;
-  public BigDecimal latestPrice;
+  public Float matchScore;
 
-  public StockInfo() {
+  public StockSearchMatch() {
   }
 
-  public StockInfo(String symbol, String name, String currency, String exchange) {
+  public StockSearchMatch(String symbol, String name, String currency, Float matchScore) {
     this.symbol = symbol;
     this.name = name;
     this.currency = currency;
-    this.exchange = exchange;
+    this.matchScore = matchScore;
   }
 }

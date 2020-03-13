@@ -1,7 +1,5 @@
 package nl.zencode.port.security;
 
-import nl.zencode.port.q.price.YahooFinanceRepositoryOld;
-
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -16,7 +14,6 @@ import javax.ws.rs.core.Response;
 @Path("/security")
 public class LoginEndpoint {
 
-  @Inject YahooFinanceRepositoryOld yahooFinanceRepository;
   @Inject ApplicationUserRepository applicationUserRepository;
 
   @POST

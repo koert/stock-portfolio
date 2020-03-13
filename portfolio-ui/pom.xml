@@ -139,7 +139,7 @@
                 <version>1.5.1</version>
                 <configuration>
                     <bucketName>portfolio-ui</bucketName>
-                    <source>target/dist/</source>
+                    <source>target/dist</source>
                     <destination>ui</destination>
                     <recursive>true</recursive>
                 </configuration>

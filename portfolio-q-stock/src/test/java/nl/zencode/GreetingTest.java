@@ -16,18 +16,4 @@ public class GreetingTest
                 .body(equalTo("hello jaxrs 2"));
     }
 
-    @Test
-    public void testServlet() {
-        RestAssured.when().get("/servlet/hello").then()
-                .contentType("text/plain")
-                .body(equalTo("hello servlet"));
-    }
-
-    @Test
-    public void testVertx() {
-        RestAssured.when().get("/vertx/hello").then()
-                .contentType("text/plain")
-                .body(equalTo("hello vertx"));
-    }
-
 }
