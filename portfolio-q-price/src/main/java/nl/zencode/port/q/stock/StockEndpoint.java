@@ -41,7 +41,7 @@ public class StockEndpoint {
   }
 
   @GET
-  @Path("/{symbol}/info0")
+  @Path("/{symbol}/info")
   public StockInfo info(@PathParam("symbol") String symbol) {
     Stock stock = yahooFinanceRepository.getStock(symbol);
     if (stock == null) {
@@ -51,7 +51,7 @@ public class StockEndpoint {
   }
 
   @GET
-  @Path("/{symbol}/info")
+  @Path("/{symbol}/info1")
   @Produces(MediaType.APPLICATION_JSON)
   public StockInfo info1(@PathParam("symbol") String symbol) {
     StockInfo stock = yahooFinanceRepository.getStock1(symbol);
