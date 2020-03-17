@@ -52,15 +52,23 @@ public class TokenUtils {
     return claims.jws().signatureKeyId(kid).sign(privateKey);
   }
 
+  /**
+   * Generate JWT token.
+   * @param subject Username.
+   * @return JWT string.
+   */
   public static String generateTokenString(String subject) {
 
     String signedToken = null;
     try {
+
+
       PrivateKey privateKey = readPrivateKey("/META-INF/resources/privateKey.pem");
 
       long currentTimeMillis = System.currentTimeMillis() / 1000;
       signedToken = Jwt.claims()
           .subject(subject)
+          .groups("user")
           .issuer("https://stockportfolio.test")
           .issuedAt(currentTimeMillis)
           .expiresAt(currentTimeMillis + EXPIRATION)

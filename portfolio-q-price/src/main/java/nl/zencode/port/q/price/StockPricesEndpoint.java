@@ -3,6 +3,7 @@ package nl.zencode.port.q.price;
 import nl.zencode.port.q.YahooFinanceRepository;
 import nl.zencode.port.q.stock.StockInfo;
 import nl.zencode.port.q.stock.yahoo.FinQuoteResponse;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yahoofinance.Stock;
@@ -10,6 +11,8 @@ import yahoofinance.YahooFinance;
 import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.histquotes.Interval;
 
+import javax.annotation.security.RolesAllowed;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -27,16 +30,20 @@ import java.util.stream.Collectors;
  * @author Koert Zeilstra
  */
 @Path("/prices")
+@RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 public class StockPricesEndpoint {
 
   private static final Logger log = LoggerFactory.getLogger(StockPricesEndpoint.class);
 
+  @Inject JsonWebToken jsonWebToken;
   @Inject YahooFinanceRepository yahooFinanceRepository;
 
   @GET
   @Path("/{symbol}/latest")
+  @RolesAllowed("user")
   public StockLatestPriceResponse latest(@PathParam("symbol") String symbol) {
+    log.debug("latest {}", jsonWebToken);
     StockLatestPriceResponse response = null;
     Stock stock = null;
     try {
@@ -53,6 +60,7 @@ public class StockPricesEndpoint {
   }
 
   @GET
+  @RolesAllowed("user")
   @Path("/{symbol}/latestPrice")
   public StockLatestPriceResponse latestPrice(@PathParam("symbol") String symbol) {
     StockLatestPriceResponse response = null;
@@ -75,6 +83,7 @@ public class StockPricesEndpoint {
    * @throws IOException Failed to retrieve price history.
    */
   @GET
+  @RolesAllowed("user")
   @Path("/{symbol}/history0")
   public StockPriceHistoryResponse history0(@PathParam("symbol") String symbol,
       @QueryParam("startDate") String startDateParam,
@@ -138,6 +147,7 @@ public class StockPricesEndpoint {
    * @throws IOException Failed to retrieve price history.
    */
   @GET
+  @RolesAllowed("user")
   @Path("/{symbol}/history")
   public StockPriceHistoryResponse history(@PathParam("symbol") String symbol,
       @QueryParam("startDate") String startDateParam,
@@ -192,6 +202,7 @@ public class StockPricesEndpoint {
    * @throws IOException Failed to retrieve price history.
    */
   @GET
+  @RolesAllowed("user")
   @Path("/{symbol}/history1")
   public StockPriceHistoryResponse history1(@PathParam("symbol") String symbol,
       @QueryParam("startDate") String startDateParam,

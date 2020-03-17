@@ -4,9 +4,7 @@
 
 export const environment = {
   production: false,
-  // priceServiceUrl: "http://localhost:3000"
-  // priceServiceUrl: "http://localhost:8081"
-  priceServiceUrl: ""
+  priceServiceUrl: "http://localhost:3000"
 };
 
 /*

@@ -1,0 +1,18 @@
+{
+  "/portfolio": {
+    "target": "http://localhost:3000",
+    "secure": false
+  },
+  "/prices": {
+    "target": "http://localhost:3000",
+    "secure": false
+  },
+  "/security": {
+    "target": "http://localhost:3000",
+    "secure": false
+  },
+  "/stocks": {
+    "target": "http://localhost:3000",
+    "secure": false
+  }
+}
