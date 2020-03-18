@@ -4,13 +4,17 @@ import { PortfolioComponent } from './portfolio.component';
 import {StockLatestPriceResponse, StockService} from "../stock.service";
 import {instance, mock, when} from "ts-mockito";
 import {Observable, of} from "rxjs";
+import {NotificationService} from "../notification.service";
+import {PortfolioService} from "../portfolio.service";
 
 describe('PortfolioComponent (Unit test)', () => {
   let component: PortfolioComponent;
+  let notificationService = mock(NotificationService);
   let stockService = mock(StockService);
+  let portfolioService = mock(PortfolioService);
 
   beforeEach(async(() => {
-    component = new PortfolioComponent(instance(stockService));
+    component = new PortfolioComponent(instance(notificationService), instance(stockService), instance(portfolioService));
   }));
 
   it('ngOnInit', () => {

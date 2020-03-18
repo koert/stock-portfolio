@@ -9,16 +9,33 @@ import {DropdownModule} from "primeng/dropdown";
 import {PanelModule} from "primeng/panel";
 import {TableModule} from "primeng/table";
 import {FormsModule} from "@angular/forms";
+import {ToastModule} from "primeng/toast";
+import {instance, mock, when} from "ts-mockito";
+import {StockService} from "./stock.service";
+import {Message, NotificationService} from "./notification.service";
+import {MessageService} from "primeng/api";
+import {of} from "rxjs";
 
 describe('AppComponent', () => {
+
+  let notificationService = mock(NotificationService);
+  let messageService = mock(MessageService);
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [BrowserModule, BrowserAnimationsModule, RouterTestingModule, FormsModule,
-        ButtonModule, DialogModule, DropdownModule, PanelModule, TableModule],
+        ButtonModule, DialogModule, DropdownModule, PanelModule, TableModule, ToastModule],
       declarations: [
         AppComponent
       ],
+      providers: [
+        {provide: NotificationService, useValue: instance(notificationService)},
+        {provide: MessageService, useValue: instance(messageService)}
+      ],
     }).compileComponents();
+
+    let message = new Message();
+    when(notificationService.getMessageSubject()).thenReturn(of(message));
   }));
 
   it('should create the app', () => {

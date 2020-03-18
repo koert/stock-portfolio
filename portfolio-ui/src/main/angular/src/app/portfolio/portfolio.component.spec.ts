@@ -13,19 +13,30 @@ import {FormsModule} from "@angular/forms";
 import {TableModule} from "primeng/table";
 import {CalendarModule} from "primeng/calendar";
 import {of} from "rxjs";
+import {OverlayPanelModule} from "primeng/overlaypanel";
+import {PriceDialogComponent} from "./price-dialog/price-dialog.component";
+import {ChartModule} from "primeng/chart";
+import {SelectButtonModule} from "primeng/primeng";
+import {NotificationService} from "../notification.service";
+import {PortfolioService} from "../portfolio.service";
 
 describe('PortfolioComponent', () => {
   let component: PortfolioComponent;
   let fixture: ComponentFixture<PortfolioComponent>;
+  let notificationService = mock(NotificationService);
   let stockService = mock(StockService);
+  let portfolioService = mock(PortfolioService);
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [BrowserModule, BrowserAnimationsModule, FormsModule,
-        ButtonModule, CalendarModule, DialogModule, DropdownModule, PanelModule, TableModule],
-      declarations: [ PortfolioComponent ],
+        ButtonModule, CalendarModule, ChartModule, DialogModule, DropdownModule, OverlayPanelModule,
+        PanelModule, SelectButtonModule, TableModule],
+      declarations: [ PortfolioComponent, PriceDialogComponent ],
       providers: [
-        {provide: StockService, useValue: instance(stockService)}
+        {provide: NotificationService, useValue: instance(notificationService)},
+        {provide: StockService, useValue: instance(stockService)},
+        {provide: PortfolioService, useValue: instance(portfolioService)}
       ],
     })
     .compileComponents();
